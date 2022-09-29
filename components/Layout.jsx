@@ -2,6 +2,7 @@ import Head from 'next/head'
 import React from 'react'
 import { AppBar, Container, Toolbar, Typography } from "@material-ui/core"
 import useStyles from './../utils/styles';
+import Link from 'next/link';
 
 export default function Layout({ children }) {
 
@@ -14,9 +15,20 @@ export default function Layout({ children }) {
       </Head>
       <AppBar position="static" className={`${classes.navbar}`}>
         <Toolbar>
-            <Typography>
-                Amazona
+            <Typography className={classes.brand}>
+                <Link href="/">
+                  Amazona
+                </Link>
             </Typography>
+            <div className={classes.grow}></div>
+            <div>
+              <Link href="/cart">
+                Cart
+              </Link>
+              <Link href="/login">
+                Login
+              </Link>
+            </div>
         </Toolbar>
       </AppBar>
       <Container className={`${classes.main}`}>
