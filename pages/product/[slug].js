@@ -22,9 +22,11 @@ export default function ProductScreen() {
   return (
     <Layout title={product.name} description={product.description}>
       <div className={classes.section}>
-        <Link href={`/`}>
-            Back to products
-        </Link> 
+          <Typography  color="primary">
+            <Link href={`/`} passHref>
+                Back to products
+            </Link> 
+          </Typography> 
       </div>
       <Grid container spacing={1}>
         <Grid item md={6} xs={12}>
@@ -33,7 +35,7 @@ export default function ProductScreen() {
         <Grid item md={3} xs={12}>
           <List>
             <ListItem>
-              <Typography component="h1" variant="h5">{product.name}</Typography>
+              <Typography component="h1" variant="h1">{product.name}</Typography>
             </ListItem>
             <ListItem>
               <Typography>Category: {product.category}</Typography>
