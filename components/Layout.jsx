@@ -1,12 +1,23 @@
 import Head from 'next/head'
 import React from 'react'
-import { AppBar, Container, createMuiTheme, CssBaseline, ThemeProvider, Toolbar, Typography } from "@material-ui/core"
+import { AppBar, Container, CssBaseline, ThemeProvider, Toolbar, Typography, Switch } from "@material-ui/core";
+import { createTheme } from "@material-ui/core/styles"
 import useStyles from './../utils/styles';
 import Link from 'next/link';
+import { useContext } from 'react';
+import { Store } from './../utils/Store';
+import Cookies from 'js-cookie';
+import { useEffect } from 'react';
+import { useState } from 'react';
 
 export default function Layout({ title, description, children }) {
 
-  const theme = createMuiTheme({
+  const {state, dispatch} = useContext(Store);
+  const { darkMode } = state;
+  const [mode, setMode] = useState(false); 
+  useEffect(() => setMode(darkMode), [darkMode]);
+
+  const theme = createTheme({
     typography: {
       h1 : {
         fontSize: '1.6rem',
@@ -20,7 +31,7 @@ export default function Layout({ title, description, children }) {
       },
     },
     palette: {
-      type: 'light',
+      type: mode ? 'dark' : 'light',
       primary: {
         main: '#f0c000',
       },
@@ -31,6 +42,12 @@ export default function Layout({ title, description, children }) {
   });
   const classes = useStyles();
 
+  const darkModeHandler = () => {
+    dispatch({ type: mode ? 'DARK_MODE_OFF' : 'DARK_MODE_ON' });
+    const newDarkMode = !darkMode;
+    Cookies.set('darkMode', newDarkMode ? 'ON' : 'OFF');
+  } 
+
   return (
     <div>
       <Head>
@@ -39,7 +56,7 @@ export default function Layout({ title, description, children }) {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <AppBar position="static" className={`${classes.navbar}`}>
+        <AppBar position="static" className={`${classes.navbar}`}> 
           <Toolbar>
               <Typography className={classes.brand}>
                   <Link href="/">
@@ -47,7 +64,9 @@ export default function Layout({ title, description, children }) {
                   </Link>
               </Typography>
               <div className={classes.grow}></div>
-              <div>
+              <div> 
+                <Switch checked={darkMode} onChange={darkModeHandler}>
+                </Switch>
                 <Link href="/cart">
                   Cart
                 </Link>
