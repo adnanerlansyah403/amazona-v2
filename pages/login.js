@@ -69,7 +69,7 @@ export default function LoginScreen() {
             <ListItem>
                 Don&apos;t have an account?, &nbsp;  
                 <Typography color="primary">
-                    <Link href="/register"> Register Now </Link>
+                    <Link href={`/register?redirect=${redirect || '/'}`}> Register Now </Link>
                 </Typography>
             </ListItem>
         </List>

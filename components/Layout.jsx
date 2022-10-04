@@ -22,7 +22,7 @@ export default function Layout({ title, description, children }) {
   useEffect(() => {
     setCartItemsCount(cart.cartItems.reduce((a, c) => a + c.quantity, 0));
     setUserInformation(userInfo);
-  }, [cart.cartItems, userInfo]);
+  }, [cart.cartItems, userInfo, userInformation]);
 
   const [mode, setMode] = useState(false); 
   useEffect(() => setMode(darkMode), [darkMode]);
