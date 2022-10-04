@@ -10,7 +10,7 @@ import Cookies from 'js-cookie';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 
-export default function RegisterScree() {
+export default function RegisterScreen() {
 
     const { handleSubmit, control, formState: { errors } } = useForm();
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
