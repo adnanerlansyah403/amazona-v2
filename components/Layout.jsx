@@ -14,6 +14,12 @@ export default function Layout({ title, description, children }) {
 
   const {state, dispatch} = useContext(Store);
   const { darkMode, cart } = state;
+  const [cartItemsCount, setCartItemsCount] = useState(0);
+
+  useEffect(() => {
+    setCartItemsCount(cart.cartItems.reduce((a, c) => a + c.quantity, 0));
+  }, [cart.cartItems]);
+
   const [mode, setMode] = useState(false); 
   useEffect(() => setMode(darkMode), [darkMode]);
 
@@ -68,9 +74,12 @@ export default function Layout({ title, description, children }) {
                 <Switch checked={darkMode} onChange={darkModeHandler}>
                 </Switch>
                 <Link href="/cart" passHref>
-                  {cart.cartItems.length > 0 ? <Badge color="secondary" badgeContent={cart.cartItems.length}>
-                    <a>Cart</a>
-                  </Badge> : "Cart"}
+                  {cartItemsCount > 0 ? 
+                  <a>
+                    <Badge color="secondary" badgeContent={cartItemsCount}>
+                      Cart
+                    </Badge>
+                  </a> : "Cart"}
                 </Link>
                 <Link href="/login">
                   Login

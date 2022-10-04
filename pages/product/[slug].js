@@ -8,11 +8,13 @@ import db from './../../utils/db';
 import Product from './../../models/ProductModel';
 import axios from 'axios';
 import { Store } from '../../utils/Store';
+import { useRouter } from 'next/router';
 
 export default function ProductScreen({product}) {
 
-    const {state, dispatch} = useContext(Store);
+    const {dispatch} = useContext(Store);
     const classes = useStyles();
+    const router = useRouter();
 
     if(!product) {
         return <div>Product Not Found</div>
@@ -25,13 +27,15 @@ export default function ProductScreen({product}) {
         return;
       }
       dispatch({ type: 'CART_ADD_ITEM', payload: {...product, quantity: 1 }});
+
+      router.push('/cart');
     }
     
   return (
     <Layout title={product.name} description={product.description}>
       <div className={classes.section}>
-          <Typography  color="primary">
-            <Link href={`/`} passHref>
+          <Typography color="primary">
+            <Link href={`/`}>
                 Back to products
             </Link> 
           </Typography> 
@@ -43,7 +47,7 @@ export default function ProductScreen({product}) {
         <Grid item md={3} xs={12}>
           <List>
             <ListItem>
-              <Typography component="h1" variant="h1">{product.name}</Typography>
+              <Typography variant="h1">{product.name}</Typography>
             </ListItem>
             <ListItem>
               <Typography>Category: {product.category}</Typography>

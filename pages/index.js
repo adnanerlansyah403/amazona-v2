@@ -8,7 +8,6 @@ export default function Home({ products }) {
 
   return (
     <Layout>
-      <div>
         <h1>Products</h1>
         <Grid container spacing={3}>
           {products?.map((product) => (
@@ -18,7 +17,7 @@ export default function Home({ products }) {
                   <CardActionArea>
                     <CardMedia component={'img'} image={product.image} title={product.name} />
                     <CardContent>
-                      <Typography as>
+                      <Typography>
                         {product.name}
                       </Typography>
                     </CardContent>
@@ -36,7 +35,6 @@ export default function Home({ products }) {
             </Grid>
           ))}
         </Grid>
-      </div>
     </Layout>
   )
 }
