@@ -5,8 +5,9 @@ import { useRouter } from 'next/router';
 import React, { useContext, useEffect, useState } from 'react'
 import Layout from '../components/Layout';
 import { Store } from './../utils/Store';
+import dynamic from 'next/dynamic';
 
-export default function CartScreen() {
+function CartScreen() {
 
     const router = useRouter();
     const { state, dispatch } = useContext(Store);
@@ -44,8 +45,10 @@ export default function CartScreen() {
                                 <TableRow key={item._id}>
                                     <TableCell>
                                         <Link href={`/product/${item.slug}`}>
-                                            <Image src={item.image} alt={item.name} width="50" height="50"></Image>
-                                        </Link>
+                                            <a>
+                                                <Image src={item.image} alt={item.name} width="50" height="50" />
+                                            </a>
+                                        </Link> 
                                     </TableCell>
                                     <TableCell>
                                         <Link href={`/product/${item.slug}`}>
@@ -82,7 +85,7 @@ export default function CartScreen() {
                     </Table>
                 </TableContainer>
             </Grid>
-            <Grid md={3} xs={12}>
+            <Grid item md={3} xs={12}>
                 <Card>
                     <List>
                         <ListItem>
@@ -102,3 +105,5 @@ export default function CartScreen() {
     </Layout>
   )
 }
+
+export default dynamic(() => Promise.resolve(CartScreen), {ssr: false});

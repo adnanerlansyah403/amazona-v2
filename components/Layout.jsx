@@ -76,10 +76,14 @@ export default function Layout({ title, description, children }) {
                 <Link href="/cart" passHref>
                   {cartItemsCount > 0 ? 
                   <a>
-                    <Badge color="secondary" badgeContent={cartItemsCount}>
+                    <Badge overlap='rectangular' color="secondary" badgeContent={cartItemsCount}>
                       Cart
                     </Badge>
-                  </a> : "Cart"}
+                  </a> : 
+                  <a>
+                    Cart
+                  </a>
+                  }
                 </Link>
                 <Link href="/login">
                   Login
