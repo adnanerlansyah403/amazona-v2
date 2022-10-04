@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import React from 'react'
-import { AppBar, Container, CssBaseline, ThemeProvider, Toolbar, Typography, Switch } from "@material-ui/core";
+import { AppBar, Container, CssBaseline, ThemeProvider, Toolbar, Typography, Switch, Badge } from "@material-ui/core";
 import { createTheme } from "@material-ui/core/styles"
 import useStyles from './../utils/styles';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ import { useState } from 'react';
 export default function Layout({ title, description, children }) {
 
   const {state, dispatch} = useContext(Store);
-  const { darkMode } = state;
+  const { darkMode, cart } = state;
   const [mode, setMode] = useState(false); 
   useEffect(() => setMode(darkMode), [darkMode]);
 
@@ -67,8 +67,10 @@ export default function Layout({ title, description, children }) {
               <div> 
                 <Switch checked={darkMode} onChange={darkModeHandler}>
                 </Switch>
-                <Link href="/cart">
-                  Cart
+                <Link href="/cart" passHref>
+                  {cart.cartItems.length > 0 ? <Badge color="secondary" badgeContent={cart.cartItems.length}>
+                    <a>Cart</a>
+                  </Badge> : "Cart"}
                 </Link>
                 <Link href="/login">
                   Login
