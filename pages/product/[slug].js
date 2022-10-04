@@ -4,16 +4,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react'
 import Layout from './../../components/Layout';
-import data from './../../utils/data';
 import useStyles from './../../utils/styles';
+import db from './../../utils/db';
+import Product from './../../models/ProductModel';
 
-export default function ProductScreen() {
+export default function ProductScreen({product}) {
 
     const classes = useStyles();
-    const router = useRouter();
-    const { slug } = router.query;
-
-    const product = data.products.find(product => product.slug === slug); 
 
     if(!product) {
         return <div>Product Not Found</div>
@@ -88,4 +85,20 @@ export default function ProductScreen() {
       </Grid>
     </Layout>
   )
+}
+
+export async function getServerSideProps ({ params }) {
+
+  const { slug } = params;
+  await db.connect();
+
+  const product = await Product.findOne({slug}).lean();
+
+  await db.disconnect();
+  
+  return {
+    props: {
+      product: db.convertDocToObject(product),
+    }
+  }
 }
