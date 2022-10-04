@@ -6,6 +6,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import Layout from '../components/Layout';
 import { Store } from './../utils/Store';
 import dynamic from 'next/dynamic';
+import axios from 'axios';
 
 function CartScreen() {
 
@@ -17,7 +18,26 @@ function CartScreen() {
     
     const [carts, setCarts] = useState([]);
 
+    const addToCartHandler = async (item, quantity) => {
+        const { data } = await axios.get(`/api/products/${item._id}`);
+        if(data.countInStock < quantity) {
+          window.alert('Sorry. Product is out of stock');
+          return;
+        }
+        dispatch({ type: 'CART_ADD_ITEM', payload: {...item, quantity }});
+  
+        // router.push('/cart');
+    }
+
+    const removeItemHandler = (item) => {
+        dispatch({ type: 'CART_REMOVE_ITEM', payload: item });
+    }
+
     useEffect(() => setCarts(cartItems), [cartItems])
+
+    const checkoutHandler = () => {
+        router.push('/shipping')
+    }
 
   return (
     <Layout title="Shopping Cart">
@@ -25,7 +45,10 @@ function CartScreen() {
         Shopping cart
       </Typography>
       {carts.length === 0 ? <div>
-        Cart is empty. <Link href="/">Go back to shopping</Link>
+        Cart is empty. {" "}
+        <Typography color="primary">
+            <Link href="/">Go to Shopping</Link>
+        </Typography>
       </div> : (
         <Grid container spacing={6}>
             <Grid item md={9} xs={12}>
@@ -63,7 +86,10 @@ function CartScreen() {
                                         </Link>
                                     </TableCell>
                                     <TableCell align="right">
-                                        <Select value={item.quantity}>
+                                        <Select 
+                                        value={item.quantity}
+                                        onChange={(e) => addToCartHandler(item, e.target.value)}
+                                        >
                                         {[...Array(item.countInStock).keys()].map((x) => (
                                             <MenuItem key={x + 1} value={x + 1}>
                                             {x + 1}
@@ -77,7 +103,11 @@ function CartScreen() {
                                         </Typography>
                                     </TableCell>
                                     <TableCell align="right">
-                                        <Button variant="contained" color="secondary">X</Button>
+                                        <Button variant="contained" color="secondary"
+                                        onClick={() => removeItemHandler(item)}
+                                        >
+                                            X
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -90,12 +120,16 @@ function CartScreen() {
                     <List>
                         <ListItem>
                             <Typography variant="h2">
-                                Subtotal ({cartItems.reduce((a, c) => a + c.quantity * c.price, 0)} {' '} items)
-                                : & {cartItems.reduce((a, c) => a + c.quantity * c.price, 0)}
+                                Subtotal ({cartItems.reduce((acc, cur) => acc + cur.quantity, 0)} items) {' '} 
+                                : & $ {cartItems.reduce((a, c) => a + c.quantity * c.price, 0)}
                             </Typography>
                         </ListItem>
                         <ListItem>
-                            <Button variant="contained" color="primary" fullWidth>Checkout</Button>
+                            <Button variant="contained" color="primary" fullWidth
+                            onClick={checkoutHandler}
+                            >
+                                Checkout
+                            </Button>
                         </ListItem>
                     </List>
                 </Card>

@@ -24,6 +24,10 @@ const useStyles = makeStyles({
     },
     section: {
         marginBlock: '10px',
+    },
+    form: {
+        maxWidth: 800,
+        margin: '0 auto',
     }
 });
 
