@@ -1,4 +1,4 @@
-import { Button, Card, Grid, List, ListItem, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
+import { Button, Card, CircularProgress, Grid, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -6,17 +6,23 @@ import React, { useContext, useEffect, useState } from 'react'
 import Layout from '../components/Layout';
 import { Store } from '../utils/Store';
 import dynamic from 'next/dynamic';
-import axios from 'axios';
 import useStyles from '../utils/styles';
 import { round2 } from '../helpers/calculate';
 import CheckoutWizard from './../components/CheckoutWizard';
+import { useSnackbar } from 'notistack';
+import { getError } from '../utils/error';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 function PlaceOrderScreen() {
 
     const classes = useStyles();
+    const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+    const [ loading, setLoading ] = useState(false);
     const router = useRouter();
     const { state, dispatch } = useContext(Store);
     const {
+      userInfo,
       cart: { shippingAddress, cartItems, paymentMethod },
     } = state;
     
@@ -27,6 +33,9 @@ function PlaceOrderScreen() {
         if(!paymentMethod) {
             router.push('/payment');
         }
+        if(cartItems.length === 0) {
+            router.push('/cart');
+        }
     }, []);
 
     const itemsPrice = round2(cartItems.reduce((a, c) => a + c.price * c.quantity, 0));
@@ -34,9 +43,36 @@ function PlaceOrderScreen() {
     const taxPrice = round2(itemsPrice * 0.15);
     const totalPrice = round2(itemsPrice + shippingPrice + taxPrice);
 
+    const placeOrderHandler = async () => {
+        closeSnackbar();
+        try {
+            setLoading(true);
+            const { data } = await axios.post(`/api/orders`, {
+                orderItems: cartItems,
+                shippingAddress,
+                paymentMethod,
+                itemsPrice,
+                shippingPrice,
+                taxPrice,
+                totalPrice,
+            }, {
+                headers: {
+                    authorization: 'Bearer ' + userInfo.token,
+                },
+            });
+            dispatch({ type: 'CART_CLEAR' });
+            Cookies.remove('cartItems');
+            setLoading(false);
+            router.push(`/order/${data._id}`);
+        } catch (error) {
+            setLoading(false);
+            enqueueSnackbar(getError(error), { variant: "error" });
+        }
+    }
+
   return (
     <Layout title="Shopping Cart">
-        <CheckoutWizard activeStep={4}></CheckoutWizard>
+        <CheckoutWizard activeStep={3}></CheckoutWizard>
       <Typography component="h1" variant="h1">
         Place Order
       </Typography>
@@ -50,9 +86,9 @@ function PlaceOrderScreen() {
                             </Typography>
                         </ListItem>
                         <ListItem>
-                            {shippingAddress.fullName}, {shippingAddress.address}, {' '} 
-                            {shippingAddress.city}, {shippingAddress.postalCode}, {' '}
-                            {shippingAddress.country}
+                            {shippingAddress?.fullName}, {shippingAddress?.address}, {' '} 
+                            {shippingAddress?.city}, {shippingAddress?.postalCode}, {' '}
+                            {shippingAddress?.country}
                         </ListItem>
                     </List>
                 </Card>
@@ -68,7 +104,7 @@ function PlaceOrderScreen() {
                         </ListItem>
                     </List>
                 </Card>
-                <Card className={classes.section}>
+                <Card className={`${classes.section}`}>
                     <List>
                         <ListItem>
                             <Typography component="h2" variant="h2">Order Items</Typography>
@@ -179,11 +215,14 @@ function PlaceOrderScreen() {
                                 </Grid>
                         </ListItem>
                         <ListItem>
-                            <Button variant="contained" color="primary" fullWidth
+                            <Button onClick={placeOrderHandler} variant="contained" color="primary" fullWidth
                             >
-                                placeOrder
+                                Place Order
                             </Button>
                         </ListItem>
+                        {loading && 
+                            <ListItem><CircularProgress /></ListItem>
+                        }
                     </List>
                 </Card>
             </Grid>

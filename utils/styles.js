@@ -38,7 +38,10 @@ const useStyles = makeStyles({
     },
     paddingNone: {
         padding: 0,
-    }
+    },
+    boxShadowNone: {
+        boxShadow: 'none'
+    },
 });
 
 export default useStyles;

@@ -74,13 +74,6 @@ function CartScreen() {
                                         </Link> 
                                     </TableCell>
                                     <TableCell>
-                                        <Link href={`/product/${item.slug}`}>
-                                            <Typography>
-                                                {item.name}
-                                            </Typography>
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell>
                                         <Link href={`/product/${item.slug}`} passHref>
                                             <Typography>{item.name}</Typography>
                                         </Link>
