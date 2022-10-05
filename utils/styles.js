@@ -35,6 +35,9 @@ const useStyles = makeStyles({
     },
     transparentBackground: {
         backgroundColor: 'transparent',
+    },
+    paddingNone: {
+        padding: 0,
     }
 });
 
