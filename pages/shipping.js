@@ -6,7 +6,7 @@ import { Store } from '../utils/Store';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import { Controller, useForm } from 'react-hook-form';
-import CheckoutWizard from './../components/checkoutWizard';
+import CheckoutWizard from './../components/CheckoutWizard';
 
 export default function ShippingScreen() {
 
@@ -18,11 +18,11 @@ export default function ShippingScreen() {
         if(!userInfo) {
             router.push('/login?redirect=/shipping');
         }
-        setValue('fullName', shippingAddress.fullName);
-        setValue('address', shippingAddress.address);
-        setValue('city', shippingAddress.city);
+        setValue('fullName', shippingAddress?.fullName);
+        setValue('address', shippingAddress?.address);
+        setValue('city', shippingAddress?.city);
         setValue('postalCode', shippingAddress.postalCode);
-        setValue('country', shippingAddress.country);
+        setValue('country', shippingAddress?.country);
     }, []);
     const classes = useStyles();
 
