@@ -20,6 +20,11 @@ import {
 } from "chart.js";
 ChartJS.register(
     CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
 )
 
 function reducer(state, action) {
@@ -77,14 +82,9 @@ function AdminDashboardScreen() {
                                 <ListItemText primary="Admin Dashboard"></ListItemText>
                             </ListItem>
                         </Link>
-                        <Link href="/profile" passHref>
+                        <Link href="/admin/orders" passHref>
                             <ListItem button component="a">
-                                <ListItemText primary="User Profile"></ListItemText>
-                            </ListItem>
-                        </Link>
-                        <Link href="/order-history" passHref>
-                            <ListItem button component="a">
-                                <ListItemText primary="Order History"></ListItemText>
+                                <ListItemText primary="Orders"></ListItemText>
                             </ListItem>
                         </Link>
                     </List>

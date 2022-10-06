@@ -1,13 +1,14 @@
-import { Card, CircularProgress, Grid, List, ListItem, Table, TableContainer, TableHead, Typography, TableRow, TableCell, TableBody, Button, ListItemText } from '@material-ui/core';
+import { Card, CircularProgress, Grid, List, ListItem, Typography,  Button, ListItemText, CardContent, CardActions, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useContext, useEffect, useReducer } from 'react'
-import { getError } from '../utils/error';
-import { Store } from '../utils/Store';
-import Layout from './../components/Layout';
-import useStyles from './../utils/styles';
+import { getError } from '../../utils/error';
+import { Store } from '../../utils/Store';
+import Layout from '../../components/Layout';
+import useStyles from '../../utils/styles';
+import { Bar } from 'react-chartjs-2';
 
 function reducer(state, action) {
     switch(action.type) {
@@ -23,14 +24,14 @@ function reducer(state, action) {
     }
 }
 
-function OrderHistoryScreen() {
+function AdminDashboardScreen() {
 
     const { state } = useContext(Store);
     const { userInfo } = state;
     const [ { loading, error, orders }, dispatch ] = useReducer(reducer,  {
         loading: true,
         error: '',
-        orders: []
+        orders: [],
     });
     const router = useRouter();
     const classes = useStyles();
@@ -39,10 +40,10 @@ function OrderHistoryScreen() {
         if(!userInfo) {
             router.push('/login');
         }
-        const fetchOrders = async () => {
+        const fetchData = async () => {
           try {
             dispatch({ type: 'FETCH_REQUEST' });
-            const { data } = await axios.get(`/api/orders/history`, {
+            const { data } = await axios.get(`/api/admin/orders`, {
               headers: { authorization: `Bearer ${userInfo.token}` },
             });
             dispatch({ type: 'FETCH_SUCCESS', payload: data });
@@ -50,7 +51,7 @@ function OrderHistoryScreen() {
             dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
           }
         };
-        fetchOrders();
+        fetchData();
     }, []);
 
   return (
@@ -59,14 +60,14 @@ function OrderHistoryScreen() {
             <Grid item md={3} xs={12}>
                 <Card className={classes.section}>
                     <List>
-                        <Link href="/profile" passHref>
+                        <Link href="/admin/dashboard" passHref>
                             <ListItem button component="a">
-                                <ListItemText primary="User Profile"></ListItemText>
+                                <ListItemText primary="Admin Dashboard"></ListItemText>
                             </ListItem>
                         </Link>
-                        <Link href="/order-history" passHref>
+                        <Link href="/admin/orders" passHref>
                             <ListItem selected button component="a">
-                                <ListItemText primary="Order History"></ListItemText>
+                                <ListItemText primary="Orders"></ListItemText>
                             </ListItem>
                         </Link>
                     </List>
@@ -77,7 +78,7 @@ function OrderHistoryScreen() {
                     <List>
                         <ListItem>
                             <Typography component="h1" variant="h1">
-                                Order History
+                                Orders
                             </Typography>
                         </ListItem>
                         <ListItem>
@@ -91,6 +92,7 @@ function OrderHistoryScreen() {
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>ID</TableCell>
+                                                <TableCell>USER</TableCell>
                                                 <TableCell>DATE</TableCell>
                                                 <TableCell>TOTAL</TableCell>
                                                 <TableCell>PAID</TableCell>
@@ -103,6 +105,9 @@ function OrderHistoryScreen() {
                                                 <TableRow key={order._id}>
                                                     <TableCell>
                                                         {order._id.substring(20, 24)}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {order.user ? order.user.name : "DELETED USER"}
                                                     </TableCell>
                                                     <TableCell>
                                                         {order.createdAt}
@@ -138,4 +143,4 @@ function OrderHistoryScreen() {
   )
 }
 
-export default dynamic(() => Promise.resolve(OrderHistoryScreen), {ssr: false});
+export default dynamic(() => Promise.resolve(AdminDashboardScreen), {ssr: false});

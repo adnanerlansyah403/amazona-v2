@@ -1,6 +1,6 @@
 import nc from 'next-connect';
 import Order from '../../../models/OrderModel';
-import { isAuth } from '../../../utils/auth';
+import { isAuth, isAdmin } from '../../../utils/auth';
 import db from '../../../utils/db';
 import User from './../../../models/UserModel';
 import Product from './../../../models/ProductModel';
@@ -13,9 +13,10 @@ const onError = async (err, req, res) => {
 const handler = nc({
   onError,
 });
-handler.use(isAuth);
+handler.use(isAuth, isAdmin);
 
 handler.get(async (req, res) => {
+  
   await db.connect();
 
   const ordersCount = await Order.countDocuments();
