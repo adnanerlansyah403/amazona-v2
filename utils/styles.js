@@ -42,6 +42,9 @@ const useStyles = makeStyles({
     boxShadowNone: {
         boxShadow: 'none'
     },
+    error: {
+        color: '#f04040',
+    }
 });
 
 export default useStyles;
