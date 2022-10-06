@@ -1,4 +1,4 @@
-import { Card, CircularProgress, Grid, List, ListItem, Typography,  Button, ListItemText, CardContent, CardActions, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
+import { Card, CircularProgress, Grid, List, ListItem, Typography,  Button, ListItemText, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -8,14 +8,13 @@ import { getError } from '../../utils/error';
 import { Store } from '../../utils/Store';
 import Layout from '../../components/Layout';
 import useStyles from '../../utils/styles';
-import { Bar } from 'react-chartjs-2';
 
 function reducer(state, action) {
     switch(action.type) {
         case 'FETCH_REQUEST':
             return { ...state, loading: true, error: '' };
         case 'FETCH_SUCCESS':
-            return { ...state, loading: false, orders: action.payload, error: '' };
+            return { ...state, loading: false, products: action.payload, error: '' };
         case 'FETCH_ERROR':
             return { ...state, loading: false, error: action.payload };
             
@@ -24,14 +23,14 @@ function reducer(state, action) {
     }
 }
 
-function AdminDashboardScreen() {
+function AdminProductsScreen() {
 
     const { state } = useContext(Store);
     const { userInfo } = state;
-    const [ { loading, error, orders }, dispatch ] = useReducer(reducer,  {
+    const [ { loading, error, products }, dispatch ] = useReducer(reducer,  {
         loading: true,
         error: '',
-        orders: [],
+        products: [],
     });
     const router = useRouter();
     const classes = useStyles();
@@ -43,7 +42,7 @@ function AdminDashboardScreen() {
         const fetchData = async () => {
           try {
             dispatch({ type: 'FETCH_REQUEST' });
-            const { data } = await axios.get(`/api/admin/orders`, {
+            const { data } = await axios.get(`/api/admin/products`, {
               headers: { authorization: `Bearer ${userInfo.token}` },
             });
             dispatch({ type: 'FETCH_SUCCESS', payload: data });
@@ -55,7 +54,7 @@ function AdminDashboardScreen() {
     }, []);
 
   return (
-    <Layout title="Order History">
+    <Layout title="Products">
         <Grid container spacing={6} className={classes.marginTopContainer}>
             <Grid item md={3} xs={12}>
                 <Card className={classes.section}>
@@ -66,12 +65,12 @@ function AdminDashboardScreen() {
                             </ListItem>
                         </Link>
                         <Link href="/admin/orders" passHref>
-                            <ListItem selected button component="a">
+                            <ListItem button component="a">
                                 <ListItemText primary="Orders"></ListItemText>
                             </ListItem>
                         </Link>
                         <Link href="/admin/products" passHref>
-                            <ListItem button component="a">
+                            <ListItem selected button component="a">
                                 <ListItemText primary="Products"></ListItemText>
                             </ListItem>
                         </Link>
@@ -83,7 +82,7 @@ function AdminDashboardScreen() {
                     <List>
                         <ListItem>
                             <Typography component="h1" variant="h1">
-                                Orders
+                                Product List
                             </Typography>
                         </ListItem>
                         <ListItem>
@@ -102,36 +101,39 @@ function AdminDashboardScreen() {
                                                 <TableCell>TOTAL</TableCell>
                                                 <TableCell>PAID</TableCell>
                                                 <TableCell>DELIVERED</TableCell>
-                                                <TableCell>ACTION</TableCell>
+                                                <TableCell>ACTIONS</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {orders.map((order) => (
-                                                <TableRow key={order._id}>
+                                            {products.map((product) => (
+                                                <TableRow key={product._id}>
                                                     <TableCell>
-                                                        {order._id.substring(20, 24)}
+                                                        {product._id.substring(20, 24)}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {order.user ? order.user.name : "DELETED USER"}
+                                                        {product.name}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {order.createdAt}
+                                                        ${product.price}
                                                     </TableCell>
                                                     <TableCell>
-                                                        ${order.totalPrice}
+                                                        {product.category}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {order.paidAt ? order.paidAt : 'Not Paid'}
+                                                        {product.countInStock}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {order.deliveredAt ? order.deliveredAt : 'Not Delivered'}
+                                                        {product.rating}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Link href={`/order/${order._id}`} passHref>
-                                                            <Button variant="contained">
-                                                                Details
+                                                        <Link href={`/admin/product/${product._id}`} passHref>
+                                                            <Button size="small" variant="contained">
+                                                                Edit
                                                             </Button>
-                                                        </Link>
+                                                        </Link> &nbsp;
+                                                        <Button size="small" variant="contained">
+                                                            Delete
+                                                        </Button>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -148,4 +150,4 @@ function AdminDashboardScreen() {
   )
 }
 
-export default dynamic(() => Promise.resolve(AdminDashboardScreen), {ssr: false});
+export default dynamic(() => Promise.resolve(AdminProductsScreen), {ssr: false});
