@@ -217,12 +217,13 @@ function PlaceOrderScreen() {
                         <ListItem>
                             <Button onClick={placeOrderHandler} variant="contained" color="primary" fullWidth
                             >
-                                Place Order
+                                {loading ?
+                                    <CircularProgress />
+                                    :
+                                    "PLace Order"
+                                }
                             </Button>
                         </ListItem>
-                        {loading && 
-                            <ListItem><CircularProgress /></ListItem>
-                        }
                     </List>
                 </Card>
             </Grid>
