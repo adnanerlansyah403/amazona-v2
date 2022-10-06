@@ -72,27 +72,26 @@ function OrderScreen({ params }) {
           (order._id && order._id !== orderId)
         ) {
           fetchOrder();
-          if(successPay) {
-            dispatch({ type: 'PAY_RESET '});
+          if (successPay) {
+            dispatch({ type: 'PAY_RESET' });
           }
         } else {
-            const loadPaypalScript = async () => {
-                const { data: clientId } = await axios.get('/api/keys/paypal', {
-                    headers: { authorization: `Bearer ${userInfo.token}` },
-                });
-                paypalDispatch({
-                    type: 'resetOptions',
-                    value: {
-                    'client-id': clientId,
-                    currency: 'USD',
-                    },
-                });
-                paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
-            };
-            loadPaypalScript();
+          const loadPaypalScript = async () => {
+            const { data: clientId } = await axios.get('/api/keys/paypal', {
+              headers: { authorization: `Bearer ${userInfo.token}` },
+            });
+            paypalDispatch({
+              type: 'resetOptions',
+              value: {
+                'client-id': clientId,
+                currency: 'USD',
+              },
+            });
+            paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
+          };
+          loadPaypalScript();
         }
-
-      }, [order, successPay]);
+    }, [order, successPay]);
 
       function createOrder(data, actions) {
         return actions.order.create({
@@ -134,8 +133,11 @@ function OrderScreen({ params }) {
         <Typography component="h1" variant="h1">
             Order {orderId}
         </Typography>
-        {loading ? <CircularProgress></CircularProgress>
-        : error ? <Typography component="h1" variant="h1" className={classes.error}>{error}</Typography> : (
+        {loading ? (
+            <CircularProgress />
+        ) : error ? (
+            <Typography className={classes.error}>{error}</Typography>
+        ) : (
             <Grid container spacing={6}>
                 <Grid item md={9} xs={12}>
                     <Card className={classes.section}>
