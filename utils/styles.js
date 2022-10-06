@@ -47,6 +47,9 @@ const useStyles = makeStyles({
     },
     fullWidth: {
         width: '100%',
+    },
+    marginTopContainer: {
+        marginTop: '.5rem',
     }
 });
 

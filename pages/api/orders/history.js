@@ -13,15 +13,14 @@ const handler = nc({
 });
 handler.use(isAuth);
 
-handler.post(async (req, res) => {
+handler.get(async (req, res) => {
   await db.connect();
-  const newOrder = new Order({
-    ...req.body,
-    user: req.user._id,
-  });
-  const order = await newOrder.save();
+
+  const orders = await Order.find({ user: req.user._id });
+
   await db.disconnect();
-  res.status(201).send(order);
+
+  res.send(orders);
 });
 
 export default handler;
