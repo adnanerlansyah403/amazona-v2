@@ -38,6 +38,11 @@ function AdminProductsScreen() {
     useEffect(() => {
         if(!userInfo) {
             router.push('/login');
+            return;
+        }
+        if(!userInfo.isAdmin) {
+            router.push('/');
+            return;
         }
         const fetchData = async () => {
           try {

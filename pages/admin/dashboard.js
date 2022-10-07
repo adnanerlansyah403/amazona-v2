@@ -57,6 +57,9 @@ function AdminDashboardScreen() {
         if(!userInfo) {
             router.push('/login');
         }
+        if(!userInfo.isAdmin) {
+            router.push('/');
+        }
         const fetchData = async () => {
           try {
             dispatch({ type: 'FETCH_REQUEST' });
