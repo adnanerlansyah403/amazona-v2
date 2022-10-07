@@ -71,31 +71,7 @@ function AdminUserListScreen() {
         } else {
             fetchData();
         }
-    }, [successDelete]);
-
-    const createHandler = async () => {
-        if(!window.confirm('Are you sure want to create a new user?')) {
-            return;
-        }
-        try {
-            dispatch({ type: 'CREATE_REQUEST' });
-            const { data } = await axios.post(
-                `/api/admin/users`,
-                {},
-                {
-                    headers: {
-                        authorization: `Bearer ${userInfo.token}`
-                    }
-                }
-            )
-            dispatch({ type: 'CREATE_SUCCESS' });
-            enqueueSnackbar('User created successfully', { variant: "success" });
-            router.push(`/admin/user/${data.user._id}`);
-        } catch (error) {
-            dispatch({ type: "CREATE_ERROR", payload: getError(error) });
-            enqueueSnackbar(getError(error), { variant: "error" });
-        }
-    }
+    }, [successDelete, userInfo]);
 
     const deleteHandler = async (userId) => {
         closeSnackbar();
@@ -121,7 +97,7 @@ function AdminUserListScreen() {
     }
 
   return (
-    <Layout title="users">
+    <Layout title="Users">
         <Grid container spacing={6} className={classes.marginTopContainer}>
             <Grid item md={3} xs={12}>
                 <Card className={classes.section}>
@@ -143,7 +119,7 @@ function AdminUserListScreen() {
                         </Link>
                         <Link href="/admin/users" passHref>
                             <ListItem selected button component="a">
-                                <ListItemText primary="users"></ListItemText>
+                                <ListItemText primary="Users"></ListItemText>
                             </ListItem>
                         </Link>
                     </List>
@@ -199,7 +175,7 @@ function AdminUserListScreen() {
                                                         <Button size="small" variant="contained"
                                                         onClick={() => deleteHandler(user._id)}
                                                         >
-                                                            {loadingDelete ? <CircularProgress /> : "Delete"}
+                                                            Delete
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>

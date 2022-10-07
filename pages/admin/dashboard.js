@@ -97,7 +97,7 @@ function AdminDashboardScreen() {
                         </Link>
                         <Link href="/admin/users" passHref>
                             <ListItem button component="a">
-                                <ListItemText primary="users"></ListItemText>
+                                <ListItemText primary="Users"></ListItemText>
                             </ListItem>
                         </Link>
                     </List>
