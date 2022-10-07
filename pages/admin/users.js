@@ -15,16 +15,9 @@ function reducer(state, action) {
         case 'FETCH_REQUEST':
             return { ...state, loading: true, error: '' };
         case 'FETCH_SUCCESS':
-            return { ...state, loading: false, products: action.payload, error: '' };
+            return { ...state, loading: false, users: action.payload, error: '' };
         case 'FETCH_ERROR':
             return { ...state, loading: false, error: action.payload };
-            
-        case 'CREATE_REQUEST':
-            return { ...state, loadingCreate: true, errorCreate: '' };
-        case 'CREATE_SUCCESS':
-            return { ...state, loadingCreate: false, errorCreate: '' };
-        case 'CREATE_ERROR':
-            return { ...state, loadingCreate: false, errorCreate: action.payload };
                         
         case 'DELETE_REQUEST':
             return { ...state, loadingDelete: true };
@@ -40,15 +33,15 @@ function reducer(state, action) {
     }
 }
 
-function AdminProductsScreen() {
+function AdminUserListScreen() {
 
     const { state } = useContext(Store);
     const { userInfo } = state;
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-    const [ { loading, error, products, loadingCreate, successDelete, loadingDelete }, dispatch ] = useReducer(reducer,  {
+    const [ { loading, error, users, successDelete, loadingDelete }, dispatch ] = useReducer(reducer,  {
         loading: true,
         error: '',
-        products: [],
+        users: [],
     });
     const router = useRouter();
     const classes = useStyles();
@@ -65,7 +58,7 @@ function AdminProductsScreen() {
         const fetchData = async () => {
           try {
             dispatch({ type: 'FETCH_REQUEST' });
-            const { data } = await axios.get(`/api/admin/products`, {
+            const { data } = await axios.get(`/api/admin/users`, {
               headers: { authorization: `Bearer ${userInfo.token}` },
             });
             dispatch({ type: 'FETCH_SUCCESS', payload: data });
@@ -81,13 +74,13 @@ function AdminProductsScreen() {
     }, [successDelete]);
 
     const createHandler = async () => {
-        if(!window.confirm('Are you sure want to create a new product?')) {
+        if(!window.confirm('Are you sure want to create a new user?')) {
             return;
         }
         try {
             dispatch({ type: 'CREATE_REQUEST' });
             const { data } = await axios.post(
-                `/api/admin/products`,
+                `/api/admin/users`,
                 {},
                 {
                     headers: {
@@ -96,23 +89,23 @@ function AdminProductsScreen() {
                 }
             )
             dispatch({ type: 'CREATE_SUCCESS' });
-            enqueueSnackbar('Product created successfully', { variant: "success" });
-            router.push(`/admin/product/${data.product._id}`);
+            enqueueSnackbar('User created successfully', { variant: "success" });
+            router.push(`/admin/user/${data.user._id}`);
         } catch (error) {
             dispatch({ type: "CREATE_ERROR", payload: getError(error) });
             enqueueSnackbar(getError(error), { variant: "error" });
         }
     }
 
-    const deleteHandler = async (productId) => {
+    const deleteHandler = async (userId) => {
         closeSnackbar();
-        if(!window.confirm('Are you sure want to delete this product?')) {
+        if(!window.confirm('Are you sure want to delete this user?')) {
             return;
         }
         try {
             dispatch({ type: 'DELETE_REQUEST' });
             await axios.delete(
-                `/api/admin/products/${productId}`,
+                `/api/admin/users/${userId}`,
                 {
                     headers: {
                         authorization: `Bearer ${userInfo.token}`
@@ -120,7 +113,7 @@ function AdminProductsScreen() {
                 }
             )
             dispatch({ type: 'DELETE_SUCCESS' });
-            enqueueSnackbar('Product deleted successfully', { variant: "success" });
+            enqueueSnackbar('User deleted successfully', { variant: "success" });
         } catch (error) {
             dispatch({ type: "DELETE_ERROR", payload: getError(error) });
             enqueueSnackbar(getError(error), { variant: "error" });
@@ -128,7 +121,7 @@ function AdminProductsScreen() {
     }
 
   return (
-    <Layout title="Products">
+    <Layout title="users">
         <Grid container spacing={6} className={classes.marginTopContainer}>
             <Grid item md={3} xs={12}>
                 <Card className={classes.section}>
@@ -144,12 +137,12 @@ function AdminProductsScreen() {
                             </ListItem>
                         </Link>
                         <Link href="/admin/products" passHref>
-                            <ListItem selected button component="a">
+                            <ListItem button component="a">
                                 <ListItemText primary="Products"></ListItemText>
                             </ListItem>
                         </Link>
                         <Link href="/admin/users" passHref>
-                            <ListItem button component="a">
+                            <ListItem selected button component="a">
                                 <ListItemText primary="users"></ListItemText>
                             </ListItem>
                         </Link>
@@ -160,19 +153,10 @@ function AdminProductsScreen() {
                 <Card className={classes.section}>
                     <List>
                         <ListItem>
-                            <Grid container alignItems="center">
-                                <Grid item xs={6}>
-                                    <Typography component="h1" variant="h1">
-                                        Product List
-                                    </Typography>
-                                    {loadingDelete && <CircularProgress />}
-                                </Grid>
-                                <Grid align="right" item xs={6}>
-                                    <Button color="primary" variant="contained" onClick={createHandler}>
-                                        {loadingCreate ? <CircularProgress /> : "Create Product"}
-                                    </Button>
-                                </Grid>
-                            </Grid>
+                            <Typography component="h1" variant="h1">
+                                User List
+                            </Typography>
+                            {loadingDelete && <CircularProgress />}
                         </ListItem>
                         <ListItem>
                             {loading ? (
@@ -185,43 +169,35 @@ function AdminProductsScreen() {
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>ID</TableCell>
-                                                <TableCell>USER</TableCell>
-                                                <TableCell>DATE</TableCell>
-                                                <TableCell>TOTAL</TableCell>
-                                                <TableCell>STOCK</TableCell>
-                                                <TableCell>RATING</TableCell>
+                                                <TableCell>NAME</TableCell>
+                                                <TableCell>EMAIL</TableCell>
+                                                <TableCell>STATUS</TableCell>
                                                 <TableCell>ACTIONS</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {products.map((product) => (
-                                                <TableRow key={product._id}>
+                                            {users.map((user) => (
+                                                <TableRow key={user._id}>
                                                     <TableCell>
-                                                        {product._id.substring(20, 24)}
+                                                        {user._id.substring(20, 24)}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {product.name}
+                                                        {user.name}
                                                     </TableCell>
                                                     <TableCell>
-                                                        ${product.price}
+                                                        {user.email}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {product.category}
+                                                        {user.isAdmin ? "Admin" : "User" }
                                                     </TableCell>
                                                     <TableCell>
-                                                        {product.countInStock}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {product.rating}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Link href={`/admin/product/${product._id}`} passHref>
+                                                        <Link href={`/admin/user/${user._id}`} passHref>
                                                             <Button size="small" variant="contained">
                                                                 Edit
                                                             </Button>
                                                         </Link> &nbsp;
                                                         <Button size="small" variant="contained"
-                                                        onClick={() => deleteHandler(product._id)}
+                                                        onClick={() => deleteHandler(user._id)}
                                                         >
                                                             {loadingDelete ? <CircularProgress /> : "Delete"}
                                                         </Button>
@@ -241,4 +217,4 @@ function AdminProductsScreen() {
   )
 }
 
-export default dynamic(() => Promise.resolve(AdminProductsScreen), {ssr: false});
+export default dynamic(() => Promise.resolve(AdminUserListScreen), {ssr: false});

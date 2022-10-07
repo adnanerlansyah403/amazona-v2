@@ -160,6 +160,11 @@ function ProductEditScreen({ params }) {
                                 <ListItemText primary="Products"></ListItemText>
                             </ListItem>
                         </Link>
+                        <Link href="/admin/users" passHref>
+                            <ListItem button component="a">
+                                <ListItemText primary="users"></ListItemText>
+                            </ListItem>
+                        </Link>
                     </List>
                 </Card>
             </Grid>

@@ -24,7 +24,7 @@ function reducer(state, action) {
     }
 }
 
-function AdminDashboardScreen() {
+function AdminOrdersScreen() {
 
     const { state } = useContext(Store);
     const { userInfo } = state;
@@ -78,6 +78,11 @@ function AdminDashboardScreen() {
                         <Link href="/admin/products" passHref>
                             <ListItem button component="a">
                                 <ListItemText primary="Products"></ListItemText>
+                            </ListItem>
+                        </Link>
+                        <Link href="/admin/users" passHref>
+                            <ListItem button component="a">
+                                <ListItemText primary="users"></ListItemText>
                             </ListItem>
                         </Link>
                     </List>
@@ -153,4 +158,4 @@ function AdminDashboardScreen() {
   )
 }
 
-export default dynamic(() => Promise.resolve(AdminDashboardScreen), {ssr: false});
+export default dynamic(() => Promise.resolve(AdminOrdersScreen), {ssr: false});
