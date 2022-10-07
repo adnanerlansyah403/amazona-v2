@@ -8,6 +8,7 @@ import { getError } from '../../utils/error';
 import { Store } from '../../utils/Store';
 import Layout from '../../components/Layout';
 import useStyles from '../../utils/styles';
+import { useSnackbar } from 'notistack';
 
 function reducer(state, action) {
     switch(action.type) {
@@ -18,6 +19,22 @@ function reducer(state, action) {
         case 'FETCH_ERROR':
             return { ...state, loading: false, error: action.payload };
             
+        case 'CREATE_REQUEST':
+            return { ...state, loadingCreate: true, errorCreate: '' };
+        case 'CREATE_SUCCESS':
+            return { ...state, loadingCreate: false, errorCreate: '' };
+        case 'CREATE_ERROR':
+            return { ...state, loadingCreate: false, errorCreate: action.payload };
+                        
+        case 'DELETE_REQUEST':
+            return { ...state, loadingDelete: true };
+        case 'DELETE_SUCCESS':
+            return { ...state, loadingDelete: false, successDelete: true };
+        case 'DELETE_ERROR':
+            return { ...state, loadingDelete: false };
+        case 'DELETE_RESET':
+            return { ...state, loadingDelete: false, successDelete: false };
+        
         default:
             return state;
     }
@@ -27,7 +44,8 @@ function AdminProductsScreen() {
 
     const { state } = useContext(Store);
     const { userInfo } = state;
-    const [ { loading, error, products }, dispatch ] = useReducer(reducer,  {
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const [ { loading, error, products, loadingCreate, successDelete, loadingDelete }, dispatch ] = useReducer(reducer,  {
         loading: true,
         error: '',
         products: [],
@@ -55,8 +73,59 @@ function AdminProductsScreen() {
             dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
           }
         };
-        fetchData();
-    }, []);
+        if(successDelete) {
+            dispatch({ type: "DELETE_RESET" });
+        } else {
+            fetchData();
+        }
+    }, [successDelete]);
+
+    const createHandler = async () => {
+        if(!window.confirm('Are you sure want to create a new product?')) {
+            return;
+        }
+        try {
+            dispatch({ type: 'CREATE_REQUEST' });
+            const { data } = await axios.post(
+                `/api/admin/products`,
+                {},
+                {
+                    headers: {
+                        authorization: `Bearer ${userInfo.token}`
+                    }
+                }
+            )
+            dispatch({ type: 'CREATE_SUCCESS' });
+            enqueueSnackbar('Product created successfully', { variant: "success" });
+            router.push(`/admin/product/${data.product._id}`);
+        } catch (error) {
+            dispatch({ type: "CREATE_ERROR", payload: getError(error) });
+            enqueueSnackbar(getError(error), { variant: "error" });
+        }
+    }
+
+    const deleteHandler = async (productId) => {
+        closeSnackbar();
+        if(!window.confirm('Are you sure want to delete this product?')) {
+            return;
+        }
+        try {
+            dispatch({ type: 'DELETE_REQUEST' });
+            await axios.delete(
+                `/api/admin/products/${productId}`,
+                {
+                    headers: {
+                        authorization: `Bearer ${userInfo.token}`
+                    }
+                }
+            )
+            dispatch({ type: 'DELETE_SUCCESS' });
+            enqueueSnackbar('Product deleted successfully', { variant: "success" });
+        } catch (error) {
+            dispatch({ type: "DELETE_ERROR", payload: getError(error) });
+            enqueueSnackbar(getError(error), { variant: "error" });
+        }
+    }
 
   return (
     <Layout title="Products">
@@ -86,9 +155,19 @@ function AdminProductsScreen() {
                 <Card className={classes.section}>
                     <List>
                         <ListItem>
-                            <Typography component="h1" variant="h1">
-                                Product List
-                            </Typography>
+                            <Grid container alignItems="center">
+                                <Grid item xs={6}>
+                                    <Typography component="h1" variant="h1">
+                                        Product List
+                                    </Typography>
+                                    {loadingDelete && <CircularProgress />}
+                                </Grid>
+                                <Grid align="right" item xs={6}>
+                                    <Button color="primary" variant="contained" onClick={createHandler}>
+                                        {loadingCreate ? <CircularProgress /> : "Create Product"}
+                                    </Button>
+                                </Grid>
+                            </Grid>
                         </ListItem>
                         <ListItem>
                             {loading ? (
@@ -104,8 +183,8 @@ function AdminProductsScreen() {
                                                 <TableCell>USER</TableCell>
                                                 <TableCell>DATE</TableCell>
                                                 <TableCell>TOTAL</TableCell>
-                                                <TableCell>PAID</TableCell>
-                                                <TableCell>DELIVERED</TableCell>
+                                                <TableCell>STOCK</TableCell>
+                                                <TableCell>RATING</TableCell>
                                                 <TableCell>ACTIONS</TableCell>
                                             </TableRow>
                                         </TableHead>
@@ -136,8 +215,10 @@ function AdminProductsScreen() {
                                                                 Edit
                                                             </Button>
                                                         </Link> &nbsp;
-                                                        <Button size="small" variant="contained">
-                                                            Delete
+                                                        <Button size="small" variant="contained"
+                                                        onClick={() => deleteHandler(product._id)}
+                                                        >
+                                                            {loadingDelete ? <CircularProgress /> : "Delete"}
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>

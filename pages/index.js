@@ -35,7 +35,7 @@ export default function Home({ products }) {
               <Card>
                 <Link href={`/product/${product.slug}`} passHref>
                   <CardActionArea>
-                    <CardMedia component={'img'} image={product.image} title={product.name} />
+                    <CardMedia height={400} component={'img'} image={product.image} title={product.name} />
                     <CardContent>
                       <Typography>
                         {product.name}

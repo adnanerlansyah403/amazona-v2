@@ -57,7 +57,7 @@ function AdminDashboardScreen() {
           }
         };
         fetchData();
-    });
+    }, []);
 
   return (
     <Layout title="Order History">
