@@ -80,6 +80,18 @@ function AdminUserListScreen() {
         }
         try {
             dispatch({ type: 'DELETE_REQUEST' });
+            const { data: user } = await axios.get(`/api/admin/users/${userId}`, {
+                headers: {
+                    authorization: `Bearer ${userInfo.token}`,
+                },
+            });
+
+            if(user.email === userInfo.email) {
+                enqueueSnackbar("Sorry, you are not allowed to delete this user", { variant: "error" });
+                dispatch({ type: 'DELETE_SUCCESS' });
+                return;
+            }
+            
             await axios.delete(
                 `/api/admin/users/${userId}`,
                 {
@@ -90,6 +102,7 @@ function AdminUserListScreen() {
             )
             dispatch({ type: 'DELETE_SUCCESS' });
             enqueueSnackbar('User deleted successfully', { variant: "success" });
+
         } catch (error) {
             dispatch({ type: "DELETE_ERROR", payload: getError(error) });
             enqueueSnackbar(getError(error), { variant: "error" });
@@ -148,7 +161,7 @@ function AdminUserListScreen() {
                                                 <TableCell>NAME</TableCell>
                                                 <TableCell>EMAIL</TableCell>
                                                 <TableCell>STATUS</TableCell>
-                                                <TableCell>ACTIONS</TableCell>
+                                                <TableCell align="center">ACTIONS</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -166,7 +179,7 @@ function AdminUserListScreen() {
                                                     <TableCell>
                                                         {user.isAdmin ? "Admin" : "User" }
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell align="center">
                                                         <Link href={`/admin/user/${user._id}`} passHref>
                                                             <Button size="small" variant="contained">
                                                                 Edit
