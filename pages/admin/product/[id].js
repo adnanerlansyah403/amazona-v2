@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
-import React, { useContext, useEffect, useReducer } from 'react'
+import React, { useState, useContext, useEffect, useReducer } from 'react'
 import { Controller, useForm } from 'react-hook-form';
 import Layout from '../../../components/Layout';
 import useStyles from '../../../utils/styles';
@@ -42,7 +42,7 @@ function ProductEditScreen({ params }) {
 
     const productId = params?.id;
     const { state } = useContext(Store);
-    const [{ loading, error, loadingUpdate, loadingUpload }, dispatch ] = useReducer(reducer, {
+    const [{ loading, error, loadingUpload }, dispatch ] = useReducer(reducer, {
         loading: true,
         error: '',
     });
@@ -51,11 +51,13 @@ function ProductEditScreen({ params }) {
     const { userInfo } = state;
     const router = useRouter();
     const classes = useStyles();
+    const [ publicId, setPublicId ] = useState("");
     
     useEffect(() => {
         if(!userInfo) {
             return router.push('/login');
         } else {
+
             const fetchData = async () => {
                 try {
                     dispatch({ type: 'FETCH_REQUEST' });
@@ -68,16 +70,37 @@ function ProductEditScreen({ params }) {
                     setValue('name', data.name);
                     setValue('slug', data.slug);
                     setValue('price', data.price);
-                    setValue('image', data.image);
+                    setValue('image', data.image.url);
+                    setPublicId(data.image.public_id);
                     setValue('category', data.category);
                     setValue('brand', data.brand);
                     setValue('countInStock', data.countInStock);
                     setValue('description', data.description);
+                    
                 } catch (error) {
                     dispatch({ type: 'FETCH_ERROR', payload: getError(error) });
                 }
             }
             fetchData();
+
+            const deleteImageProductOfCloudinary = async () => {
+                try {
+                    dispatch({ type: 'FETCH_REQUEST' });
+                    await axios.get(`/api/admin/products/${productId}/cloudinary`,
+                    {
+                        headers: {
+                            authorization: 'Bearer ' + userInfo.token,
+                        }
+                    },
+                    {
+                        publicId
+                    });
+
+                } catch (error) {
+                    dispatch({ type: 'FETCH_ERROR', payload: getError(error) });
+                }
+            }
+            deleteImageProductOfCloudinary();
         }
     }, []);
 
@@ -85,6 +108,7 @@ function ProductEditScreen({ params }) {
         const file = e.target.files[0];
         const bodyFormData = new FormData();
         bodyFormData.append('file', file);
+        console.log(bodyFormData);
         try {
         dispatch({ type: 'UPLOAD_REQUEST' });
         const { data } = await axios.post('/api/admin/upload', bodyFormData, {
@@ -95,6 +119,7 @@ function ProductEditScreen({ params }) {
         });
         dispatch({ type: 'UPLOAD_SUCCESS' });
         setValue(imageField, data.secure_url);
+        setPublicId(data.public_id)
         enqueueSnackbar('File uploaded successfully', { variant: 'success' });
         } catch (err) {
         dispatch({ type: 'UPLOAD_FAIL', payload: getError(err) });
@@ -122,6 +147,7 @@ function ProductEditScreen({ params }) {
                 category,
                 brand,
                 image,
+                publicId,
                 countInStock,
                 description,
             }, {
@@ -146,22 +172,22 @@ function ProductEditScreen({ params }) {
                 <Card className={classes.section}>
                     <List>
                         <Link href="/admin/dashboard" passHref>
-                            <ListItem button component="a">
+                            <ListItem button>
                                 <ListItemText primary="Admin Dashboard"></ListItemText>
                             </ListItem>
                         </Link>
                         <Link href="/admin/orders" passHref>
-                            <ListItem button component="a">
+                            <ListItem button>
                                 <ListItemText primary="Orders"></ListItemText>
                             </ListItem>
                         </Link>
                         <Link href="/admin/products" passHref>
-                            <ListItem selected button component="a">
+                            <ListItem selected button>
                                 <ListItemText primary="Products"></ListItemText>
                             </ListItem>
                         </Link>
                         <Link href="/admin/users" passHref>
-                            <ListItem button component="a">
+                            <ListItem button>
                                 <ListItemText primary="users"></ListItemText>
                             </ListItem>
                         </Link>
@@ -182,7 +208,7 @@ function ProductEditScreen({ params }) {
                             ) : error ? (
                                 <Typography className={classes.error}>{error}</Typography>
                             ) : (
-                            <form onSubmit={handleSubmit(submitHandler)} className={classes.form}>
+                            <form onSubmit={handleSubmit(submitHandler)} className={classes.form} encType='multipart/form-data'>
                                 <List>
                                     <ListItem>
                                         <Controller
@@ -254,6 +280,7 @@ function ProductEditScreen({ params }) {
                                             }}
                                             render={({ field }) => (
                                                 <TextField 
+                                                disabled
                                                 variant='outlined' fullWidth id="image" label="Image"
                                                 error={Boolean(errors.image)}
                                                 helperText={errors.image ? 'Image is required' : '' }
@@ -262,12 +289,12 @@ function ProductEditScreen({ params }) {
                                                 </TextField>
                                             )}
                                         >
-                                        </Controller>
+                                        </Controller>   
                                     </ListItem>
                                     <ListItem>
                                         <Button variant="contained" component="label">
                                             {loadingUpload ? <CircularProgress /> : 'Upload File'}
-                                            <input type="file" onChange={uploadHandler} hidden />
+                                            <input name='image' type="file" onChange={uploadHandler} hidden />
                                         </Button>
                                     </ListItem>
                                     <ListItem>
@@ -340,7 +367,7 @@ function ProductEditScreen({ params }) {
                                             }}
                                             render={({ field }) => (
                                                 <TextField 
-                                                variant='outlined' fullWidth multine id="description" label="Description"
+                                                variant='outlined' fullWidth multiline id="description" label="Description"
                                                 error={Boolean(errors.description)}
                                                 helperText={errors.description ? 'Description is required' : '' }
                                                 {...field}
@@ -352,7 +379,7 @@ function ProductEditScreen({ params }) {
                                     </ListItem>
                                     <ListItem>
                                         <Button variant="contained" type="submit" fullWidth color="primary">
-                                        {loadingUpdate ? <CircularProgress /> : "Update"}
+                                            Update
                                         </Button>
                                     </ListItem>
                                 </List>

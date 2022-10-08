@@ -190,7 +190,7 @@ function AdminProductsScreen() {
                                                 <TableCell>TOTAL</TableCell>
                                                 <TableCell>STOCK</TableCell>
                                                 <TableCell>RATING</TableCell>
-                                                <TableCell>ACTIONS</TableCell>
+                                                <TableCell align="center">ACTIONS</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -214,7 +214,7 @@ function AdminProductsScreen() {
                                                     <TableCell>
                                                         {product.rating}
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell align="center">
                                                         <Link href={`/admin/product/${product._id}`} passHref>
                                                             <Button size="small" variant="contained">
                                                                 Edit

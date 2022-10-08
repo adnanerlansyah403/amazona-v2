@@ -32,7 +32,9 @@ handler.post(async (req, res) => {
   const newProduct = new Product({
     name: 'sample name',
     slug: 'sample-slug-' + Math.random().toString(),
-    image: '/images/shirt1.jpg',
+    image: {
+      url: '/images/shirt1.jpg',
+    },
     price: 0,
     category: 'sample category',
     brand: 'sample brand',

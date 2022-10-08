@@ -69,7 +69,7 @@ function CartScreen() {
                                     <TableCell>
                                         <Link href={`/product/${item.slug}`}>
                                             <a>
-                                                <Image src={item.image} alt={item.name} width="50" height="50" />
+                                                <Image src={item.image.url} alt={item.name} width="50" height="50" />
                                             </a>
                                         </Link> 
                                     </TableCell>

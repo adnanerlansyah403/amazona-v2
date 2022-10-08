@@ -66,22 +66,22 @@ function AdminOrdersScreen() {
                 <Card className={classes.section}>
                     <List>
                         <Link href="/admin/dashboard" passHref>
-                            <ListItem button component="a">
+                            <ListItem button>
                                 <ListItemText primary="Admin Dashboard"></ListItemText>
                             </ListItem>
                         </Link>
                         <Link href="/admin/orders" passHref>
-                            <ListItem selected button component="a">
+                            <ListItem selected button>
                                 <ListItemText primary="Orders"></ListItemText>
                             </ListItem>
                         </Link>
                         <Link href="/admin/products" passHref>
-                            <ListItem button component="a">
+                            <ListItem button>
                                 <ListItemText primary="Products"></ListItemText>
                             </ListItem>
                         </Link>
                         <Link href="/admin/users" passHref>
-                            <ListItem button component="a">
+                            <ListItem button>
                                 <ListItemText primary="Users"></ListItemText>
                             </ListItem>
                         </Link>
