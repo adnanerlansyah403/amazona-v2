@@ -21,7 +21,6 @@ const data = {
             slug: 'free-shirt',
             category: 'Shirts',
             image: {
-                public_id: '',
                 url: '/images/shirt1.jpg'
             },
             price: 70,
@@ -35,7 +34,6 @@ const data = {
             slug: 'fit-shirt',
             category: 'Shirts',
             image: {
-                public_id: '',
                 url: '/images/shirt2.jpg',
             },
             price: 80,
@@ -49,7 +47,6 @@ const data = {
             slug: 'slim-shirt',
             category: 'Shirts',
             image: {
-                public_id: '',
                 url: '/images/shirt3.jpg',
             },
             price: 90,
@@ -63,7 +60,6 @@ const data = {
             slug: 'golf-pants',
             category: 'Pants',
             image: {
-                public_id: '',
                 url: '/images/pants1.jpg',
             },
             price: 90,
@@ -77,7 +73,6 @@ const data = {
             slug: 'fit-pants',
             category: 'Pants',
             image: {
-                public_id: '',
                 url: '/images/pants2.jpg',
             },
             price: 95,
@@ -91,7 +86,6 @@ const data = {
             slug: 'classic-pants',
             category: 'Pants',
             image: {
-                public_id: '',
                 url: '/images/pants3.jpg',
             },
             price: 75,
