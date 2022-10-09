@@ -51,7 +51,16 @@ const useStyles = makeStyles({
     },
     marginTopContainer: {
         marginTop: '.5rem',
-    }
+    },
+    reviewForm: {
+        maxWidth: 800,
+        width: '100%',
+    },
+    reviewItem: {
+        marginRight: '1rem',
+        borderRight: '1px solid #808080',
+        paddingRight: '1rem',
+    },
 });
 
 export default useStyles;

@@ -7,7 +7,7 @@ const orderSchema = new mongoose.Schema({
             name: { type: String, required: true },
             quantity: { type: Number, required: true },
             image: {
-                public_id: { type: String, default: '', unique: true },
+                public_id: { type: String, default: '' },
                 url: { type: String, default: '' },
             },
             price: { type: Number, required: true },
