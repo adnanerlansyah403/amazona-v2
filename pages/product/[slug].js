@@ -21,6 +21,7 @@ export default function ProductScreen({product}) {
     const classes = useStyles();
     const router = useRouter();
 
+    const [userInformation, setUserInformation] = useState();
     const [reviews, setReviews] = useState([]);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState("");
@@ -36,6 +37,7 @@ export default function ProductScreen({product}) {
     };
     useEffect(() => {
       fetchReviews();
+      setUserInformation(userInfo);
     }, []);
 
     if(!product) {
@@ -188,13 +190,13 @@ export default function ProductScreen({product}) {
           </>
         )}
         <ListItem>
-          {userInfo ? (
+          {userInformation ? (
             <form onSubmit={submitHandler} className={classes.reviewForm}>
                 <List>
-                  <ListItem>
+                  <ListItem style={{ paddingInline: 0 }}>
                     <Typography variant="h2">Leave your review</Typography>
                   </ListItem>
-                  <ListItem>
+                  <ListItem style={{ paddingInline: 0 }}>
                     <TextField
                       multiline
                       variant="outlined"
@@ -205,14 +207,14 @@ export default function ProductScreen({product}) {
                       onChange={(e) => setComment(e.target.value)}
                     />
                   </ListItem>
-                  <ListItem>
+                  <ListItem style={{ paddingInline: 0 }}>
                     <Rating
                       name="simple-controlled"
                       value={Number(rating)}
                       onChange={(e) => setRating(e.target.value)}
                     />
                   </ListItem>
-                  <ListItem>
+                  <ListItem style={{ paddingInline: 0 }}>
                     <Button
                       type="submit"
                       fullWidth
