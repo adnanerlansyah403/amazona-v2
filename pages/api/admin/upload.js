@@ -1,9 +1,9 @@
 import nextConnect from 'next-connect';
 import { isAuth, isAdmin } from '../../../utils/auth';
-import { onError } from '../../../utils/error';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
+import db from './../../../utils/db';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

@@ -46,7 +46,7 @@ function ProductEditScreen({ params }) {
         loading: true,
         error: '',
     });
-    const { register, handleSubmit, control, formState: { errors }, setValue } = useForm();
+    const { handleSubmit, control, formState: { errors }, setValue } = useForm();
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const { userInfo } = state;
     const router = useRouter();
