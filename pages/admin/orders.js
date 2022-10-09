@@ -1,4 +1,4 @@
-import { Card, CircularProgress, Grid, List, ListItem, Typography,  Button, ListItemText, CardContent, CardActions, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
+import { Card, CircularProgress, Grid, List, ListItem, Typography,  Button, ListItemText, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -8,7 +8,6 @@ import { getError } from '../../utils/error';
 import { Store } from '../../utils/Store';
 import Layout from '../../components/Layout';
 import useStyles from '../../utils/styles';
-import { Bar } from 'react-chartjs-2';
 
 function reducer(state, action) {
     switch(action.type) {

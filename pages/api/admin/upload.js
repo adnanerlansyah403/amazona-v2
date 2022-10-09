@@ -17,6 +17,11 @@ export const config = {
   },
 };
 
+const onError = async (err, req, res) => {
+  await db.disconnect();
+  res.status(500).send({ message: err.toString() });
+};
+
 const handler = nextConnect({ onError });
 const upload = multer();
 
