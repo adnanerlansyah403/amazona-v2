@@ -51,7 +51,7 @@ function AdminUserListScreen() {
             router.push('/login');
             return;
         }
-        if(!userInfo.isAdmin) {
+        if(!userInfo?.isAdmin) {
             router.push('/');
             return;
         }

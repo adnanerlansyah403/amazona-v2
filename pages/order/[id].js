@@ -335,7 +335,7 @@ function OrderScreen({ params }) {
                                     </ListItem>
                                 )
                             }
-                            {userInfo.isAdmin && order.isPaid && !order.isDelivered && (
+                            {userInfo?.isAdmin && order.isPaid && !order.isDelivered && (
                                 <ListItem>
                                     <Button fullWidth variant="contained" color="primary"
                                     onClick={deliverOrderHandler}
