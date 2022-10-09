@@ -46,12 +46,13 @@ function ProductEditScreen({ params }) {
         loading: true,
         error: '',
     });
-    const { handleSubmit, control, formState: { errors }, setValue } = useForm();
+    const { register, handleSubmit, control, formState: { errors }, setValue } = useForm();
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const { userInfo } = state;
     const router = useRouter();
     const classes = useStyles();
     const [ publicId, setPublicId ] = useState("");
+    const [imageName, setImageName] = useState("");
     
     useEffect(() => {
         if(!userInfo) {
@@ -70,7 +71,7 @@ function ProductEditScreen({ params }) {
                     setValue('name', data.name);
                     setValue('slug', data.slug);
                     setValue('price', data.price);
-                    setValue('image', data.image.url);
+                    setValue('link', data.image.url);
                     setPublicId(data.image.public_id);
                     setValue('category', data.category);
                     setValue('brand', data.brand);
@@ -83,73 +84,81 @@ function ProductEditScreen({ params }) {
             }
             fetchData();
 
-            const deleteImageProductOfCloudinary = async () => {
-                try {
-                    dispatch({ type: 'FETCH_REQUEST' });
-                    await axios.get(`/api/admin/products/${productId}/cloudinary`,
-                    {
-                        headers: {
-                            authorization: 'Bearer ' + userInfo.token,
-                        }
-                    },
-                    {
-                        publicId
-                    });
-
-                } catch (error) {
-                    dispatch({ type: 'FETCH_ERROR', payload: getError(error) });
-                }
-            }
-            deleteImageProductOfCloudinary();
         }
     }, []);
 
-    const uploadHandler = async (e, imageField = 'image') => {
+    const uploadHandler = async (e) => {
         const file = e.target.files[0];
-        const bodyFormData = new FormData();
-        bodyFormData.append('file', file);
-        console.log(bodyFormData);
-        try {
-        dispatch({ type: 'UPLOAD_REQUEST' });
-        const { data } = await axios.post('/api/admin/upload', bodyFormData, {
-            headers: {
-            'Content-Type': 'multipart/form-data',
-            authorization: `Bearer ${userInfo.token}`,
-            },
-        });
-        dispatch({ type: 'UPLOAD_SUCCESS' });
-        setValue(imageField, data.secure_url);
-        setPublicId(data.public_id)
-        enqueueSnackbar('File uploaded successfully', { variant: 'success' });
-        } catch (err) {
-        dispatch({ type: 'UPLOAD_FAIL', payload: getError(err) });
-        enqueueSnackbar(getError(err), { variant: 'error' });
-        }
+        setValue('image', file);
+        setImageName(file.name);
+        // try {
+        // dispatch({ type: 'UPLOAD_REQUEST' });
+        // const { data } = await axios.post('/api/admin/upload', bodyFormData, {
+        //     headers: {
+        //     'Content-Type': 'multipart/form-data',
+        //     authorization: `Bearer ${userInfo.token}`,
+        //     },
+        // });
+        // dispatch({ type: 'UPLOAD_SUCCESS' });
+        // setValue(imageField, data.secure_url);
+        // setPublicId(data.public_id)
+        // enqueueSnackbar('File uploaded successfully', { variant: 'success' });
+        // } catch (err) {
+        // dispatch({ type: 'UPLOAD_FAIL', payload: getError(err) });
+        // enqueueSnackbar(getError(err), { variant: 'error' });
+        // }
     };
 
-    const submitHandler = async ({ 
-        name,
-        slug,
-        price,
-        category,
-        brand,
-        image,
-        countInStock,
-        description,
-    }) => {
+    const submitHandler = async (e) => {
         closeSnackbar();
+        if(e.image !== undefined) {
+            const bodyFormData = new FormData();
+            bodyFormData.append('file', e.image);
+            try {
+            dispatch({ type: 'UPDATE_REQUEST' });
+            const { data } = await axios.post('/api/admin/upload', bodyFormData, {
+                headers: {
+                'Content-Type': 'multipart/form-data',
+                authorization: `Bearer ${userInfo.token}`,
+                },
+            });
+            setValue('link', data.secure_url);
+            setPublicId(data.public_id);
+            await axios.put(`/api/admin/products/${productId}`, {
+                name: e.name,
+                slug: e.slug,
+                price: e.price,
+                category: e.category,
+                brand: e.brand,
+                publicId: data.public_id,
+                image: data.secure_url,
+                countInStock: e.countInStock,
+                description: e.description
+            }, {
+                headers: {
+                    authorization: `Bearer ${userInfo.token}`,
+                },
+            });
+            dispatch({ type: 'UPDATE_SUCCESS' });
+            enqueueSnackbar('Updated and uploaded image successfully', { variant: "success" });
+            } catch (error) {
+                dispatch({ type: 'UPDATE_FAIL', payload: getError(error) });
+                enqueueSnackbar(getError(error), { variant: 'error' });
+            }
+            return router.push('/admin/products');
+        }
         try {
             dispatch({ type: 'UPDATE_REQUEST' });
             await axios.put(`/api/admin/products/${productId}`, {
-                name,
-                slug,
-                price,
-                category,
-                brand,
-                image,
+                name: e.name,
+                slug: e.slug,
+                price: e.price,
+                category: e.category,
+                brand: e.brand,
                 publicId,
-                countInStock,
-                description,
+                image: e.link,
+                countInStock: e.countInStock,
+                description: e.description
             }, {
                 headers: {
                     authorization: `Bearer ${userInfo.token}`,
@@ -158,7 +167,7 @@ function ProductEditScreen({ params }) {
 
             dispatch({ type: 'UPDATE_SUCCESS' });
             enqueueSnackbar('Product updated successfully', { variant: "success" });
-            router.push('/admin/products')
+            router.push('/admin/products');
         } catch (error) {
             dispatch({ type: 'UPDATE_REQUEST', payload: getError(error) });
             enqueueSnackbar(getError(error), { variant: 'error' });
@@ -208,7 +217,7 @@ function ProductEditScreen({ params }) {
                             ) : error ? (
                                 <Typography className={classes.error}>{error}</Typography>
                             ) : (
-                            <form onSubmit={handleSubmit(submitHandler)} className={classes.form} encType='multipart/form-data'>
+                            <form onSubmit={(e) => handleSubmit(submitHandler)(e)} className={classes.form} encType='multipart/form-data'>
                                 <List>
                                     <ListItem>
                                         <Controller
@@ -272,7 +281,7 @@ function ProductEditScreen({ params }) {
                                     </ListItem>
                                     <ListItem>
                                         <Controller
-                                            name="image"
+                                            name="link"
                                             control={control}
                                             defaultValue=""
                                             rules={{ 
@@ -281,9 +290,9 @@ function ProductEditScreen({ params }) {
                                             render={({ field }) => (
                                                 <TextField 
                                                 disabled
-                                                variant='outlined' fullWidth id="image" label="Image"
+                                                variant='outlined' fullWidth id="link" label="Link Image"
                                                 error={Boolean(errors.image)}
-                                                helperText={errors.image ? 'Image is required' : '' }
+                                                helperText={errors.image ? 'Link Image is required' : '' }
                                                 {...field}
                                                 >
                                                 </TextField>
@@ -296,6 +305,9 @@ function ProductEditScreen({ params }) {
                                             {loadingUpload ? <CircularProgress /> : 'Upload File'}
                                             <input name='image' type="file" onChange={uploadHandler} hidden />
                                         </Button>
+                                        <Typography style={{ marginLeft: "10px" }} color="primary">
+                                                {imageName && imageName}
+                                        </Typography>
                                     </ListItem>
                                     <ListItem>
                                         <Controller

@@ -31,6 +31,7 @@ handler.put(async (req, res) => {
   const product = await Product.findById(req.query.id);
 
   if(product) {
+    console.log(req.body);
     product.name = req.body.name;
     product.slug = req.body.slug;
     product.price = req.body.price;
@@ -44,9 +45,9 @@ handler.put(async (req, res) => {
     await product.save();
     await db.disconnect();
     
-    return res.send({
-      message: 'Product updated successfully',
-    });
+    // return res.send({
+    //   message: 'Product updated successfully',
+    // });
   }
 
   await db.disconnect();
