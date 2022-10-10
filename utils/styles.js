@@ -61,6 +61,9 @@ const useStyles = makeStyles({
         borderRight: '1px solid #808080',
         paddingRight: '1rem',
     },
+    toolbar: {
+        justifyContent: "space-between",
+    },
 });
 
 export default useStyles;

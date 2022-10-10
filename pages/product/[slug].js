@@ -12,8 +12,9 @@ import { useRouter } from 'next/router';
 import { Rating } from '@material-ui/lab';
 import { getError } from '../../utils/error';
 import { useSnackbar } from 'notistack';
+import dynamic from 'next/dynamic';
 
-export default function ProductScreen({product}) {
+function ProductScreen({product}) {
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const { state, dispatch } = useContext(Store);
@@ -21,7 +22,6 @@ export default function ProductScreen({product}) {
     const classes = useStyles();
     const router = useRouter();
 
-    const [userInformation, setUserInformation] = useState();
     const [reviews, setReviews] = useState([]);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState("");
@@ -37,7 +37,6 @@ export default function ProductScreen({product}) {
     };
     useEffect(() => {
       fetchReviews();
-      setUserInformation(userInfo);
     }, []);
 
     if(!product) {
@@ -190,7 +189,7 @@ export default function ProductScreen({product}) {
           </>
         )}
         <ListItem>
-          {userInformation ? (
+          {userInfo ? (
             <form onSubmit={submitHandler} className={classes.reviewForm}>
                 <List>
                   <ListItem style={{ paddingInline: 0 }}>
@@ -258,3 +257,5 @@ export async function getServerSideProps ({ params }) {
     }
   }
 }
+
+export default dynamic(() => Promise.resolve(ProductScreen), {ssr: false});

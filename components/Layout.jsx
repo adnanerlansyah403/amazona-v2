@@ -1,6 +1,8 @@
 import Head from 'next/head'
 import React from 'react'
-import { AppBar, Container, CssBaseline, ThemeProvider, Toolbar, Typography, Switch, Badge, Button, Menu, MenuItem } from "@material-ui/core";
+import { AppBar, Container, CssBaseline, ThemeProvider, Toolbar, Typography, Switch, Badge, Button, Menu, MenuItem, Box, IconButton, Drawer, List, ListItem, Divider, ListItemText } from "@material-ui/core";
+import MenuIcon from "@material-ui/icons/Menu";
+import CancelIcon from "@material-ui/icons/Cancel";
 import { createTheme } from "@material-ui/core/styles"
 import useStyles from './../utils/styles';
 import Link from 'next/link';
@@ -10,19 +12,24 @@ import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useRouter } from "next/router";
+import { useSnackbar } from 'notistack';
+import axios from 'axios';
+import { getError } from '../utils/error';
 
 export default function Layout({ title, description, children }) {
 
   const router = useRouter();
   const {state, dispatch} = useContext(Store);
   const { darkMode, cart, userInfo } = state;
+  const { enqueueSnackbar } = useSnackbar();
   const [cartItemsCount, setCartItemsCount] = useState(0);
-  const [userInformation, setUserInformation] = useState(null);
+  const [sidebarVisible, setSidebarVisible] = useState(false)
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     setCartItemsCount(cart.cartItems.reduce((a, c) => a + c.quantity, 0));
-    setUserInformation(userInfo);
-  }, [cart.cartItems, userInfo, userInformation]);
+    fetchCategories();
+  }, [cart.cartItems, userInfo]);
 
   const [mode, setMode] = useState(false); 
   useEffect(() => setMode(darkMode), [darkMode]);
@@ -76,6 +83,22 @@ export default function Layout({ title, description, children }) {
     router.push('/login');
   }
 
+  const sidebarOpenHandler = () => {
+    setSidebarVisible(true);
+  }
+  const sidebarCloseHandler = () => {
+    setSidebarVisible(false);
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get(`/api/products/categories`);
+      setCategories(data);
+    } catch (error) {
+      enqueueSnackbar(getError(error), { variant: "error"} );
+    }
+  }
+
   return (
     <div>
       <Head>
@@ -85,29 +108,79 @@ export default function Layout({ title, description, children }) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AppBar position="static" className={`${classes.navbar}`}> 
-          <Toolbar>
-              <Typography className={classes.brand}>
-                  <Link href="/">
-                    Amazona
-                  </Link>
-              </Typography>
+          <Toolbar className={classes.toolbar}>
+            <Box display="flex" alignItems="center">
+                <IconButton
+                  edge="start"
+                  aria-label="open drawer"
+                  onClick={sidebarOpenHandler}
+                  className={classes.menuButton}
+                >
+                  <MenuIcon className={classes.navbarButton} />
+                </IconButton>
+                <Typography className={classes.brand}>
+                    <Link href="/">
+                      Amazona
+                    </Link>
+                </Typography>
+              </Box>
+              <Drawer
+                anchor="left"
+                open={sidebarVisible}
+                onClose={sidebarCloseHandler}
+                style={{ width: "300px" }}
+              >
+                <List>
+                <ListItem>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      style={{ position: "relative" }}
+                    >
+                      <Typography>
+                        Shopping by category
+                        <IconButton
+                        >
+                          <CancelIcon
+                          aria-label="close"
+                          onClick={sidebarCloseHandler} />
+                        </IconButton>
+                      </Typography>
+                    </Box>
+                  </ListItem>
+                  <Divider light />
+                  {categories?.map((category) => (
+                    <Link key={category}
+                      href={`/search?category=${category}`}
+                      passHref
+                    >
+                      <ListItem button onClick={sidebarCloseHandler}>
+                        <ListItemText primary={category} />
+                      </ListItem>  
+                    </Link>
+                  ))}
+                </List>
+              </Drawer>
               <div className={classes.grow}></div>
               <div> 
                 <Switch checked={darkMode} onChange={darkModeHandler}>
                 </Switch>
-                <Link href="/cart" passHref>
-                  {cartItemsCount > 0 ? 
-                  <a>
-                    <Badge overlap='rectangular' color="secondary" badgeContent={cartItemsCount}>
+                <Typography component="span">
+                  <Link href="/cart" passHref>
+                    {cartItemsCount > 0 ? 
+                    <a>
+                      <Badge overlap='rectangular' color="secondary" badgeContent={cartItemsCount}>
+                        Cart
+                      </Badge>
+                    </a> : 
+                    <a>
                       Cart
-                    </Badge>
-                  </a> : 
-                  <a>
-                    Cart
-                  </a>
-                  }
-                </Link>
-                {userInformation ? 
+                    </a>
+                    }
+                  </Link>
+                </Typography>
+                {userInfo ? 
                 (
                   <>
                     <Button 
@@ -115,7 +188,7 @@ export default function Layout({ title, description, children }) {
                     aria-haspopup='true'
                     onClick={loginClickHandler}
                     className={classes.navbarButton}>
-                      {userInformation.name}
+                      {userInfo.name}
                     </Button>
                     <Menu
                       id="simple-menu"
@@ -134,9 +207,11 @@ export default function Layout({ title, description, children }) {
                   </>
                 ) : 
                 (
-                  <Link href="/login">
-                    Login
-                  </Link>
+                  <Typography component="span">
+                    <Link href="/login">
+                      Login
+                    </Link>
+                  </Typography>
                 )}
               </div>
           </Toolbar>
