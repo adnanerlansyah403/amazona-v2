@@ -1,8 +1,9 @@
 import Head from 'next/head'
 import React from 'react'
-import { AppBar, Container, CssBaseline, ThemeProvider, Toolbar, Typography, Switch, Badge, Button, Menu, MenuItem, Box, IconButton, Drawer, List, ListItem, Divider, ListItemText } from "@material-ui/core";
+import { AppBar, Container, CssBaseline, ThemeProvider, Toolbar, Typography, Switch, Badge, Button, Menu, MenuItem, Box, IconButton, Drawer, List, ListItem, Divider, ListItemText, InputBase } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import CancelIcon from "@material-ui/icons/Cancel";
+import SearchIcon from '@material-ui/icons/Search';
 import { createTheme } from "@material-ui/core/styles"
 import useStyles from './../utils/styles';
 import Link from 'next/link';
@@ -25,6 +26,7 @@ export default function Layout({ title, description, children }) {
   const [cartItemsCount, setCartItemsCount] = useState(0);
   const [sidebarVisible, setSidebarVisible] = useState(false)
   const [categories, setCategories] = useState([]);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     setCartItemsCount(cart.cartItems.reduce((a, c) => a + c.quantity, 0));
@@ -99,6 +101,15 @@ export default function Layout({ title, description, children }) {
     }
   }
 
+  const queryChangeHandler = (e) => {
+    setQuery(e.target.value);
+  }
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+    router.push(`/search?query=${query}`);
+  }   
+
   return (
     <div>
       <Head>
@@ -162,7 +173,23 @@ export default function Layout({ title, description, children }) {
                   ))}
                 </List>
               </Drawer>
-              <div className={classes.grow}></div>
+              <div className={classes.searchSection}>
+                <form onSubmit={submitHandler} className={classes.searchForm}>
+                    <InputBase name="query"
+                      className={classes.searchInput}
+                      placeholder="Search Products"
+                      onChange={queryChangeHandler}
+                    >
+                    </InputBase>
+                    <IconButton
+                      type="submit"
+                      className={classes.iconButton}
+                      aria-label="search"
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                </form>
+              </div>
               <div> 
                 <Switch checked={darkMode} onChange={darkModeHandler}>
                 </Switch>
