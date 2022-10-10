@@ -1,4 +1,4 @@
-import { Card, Grid, List, ListItem, CircularProgress, Typography, Button, ListItemText, TextField } from '@material-ui/core';
+import { Card, Grid, List, ListItem, CircularProgress, Typography, Button, ListItemText, TextField, FormControlLabel, Checkbox } from '@material-ui/core';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -53,6 +53,8 @@ function ProductEditScreen({ params }) {
     const classes = useStyles();
     const [ publicId, setPublicId ] = useState("");
     const [imageName, setImageName] = useState("");
+    const [featuredImage, setFeaturedImage] = useState("");
+    const [isFeatured, setIsFeatured] = useState(false);
     
     useEffect(() => {
         if(!userInfo) {
@@ -73,10 +75,13 @@ function ProductEditScreen({ params }) {
                     setValue('price', data.price);
                     setValue('link', data.image.url);
                     setPublicId(data.image.public_id);
+                    setValue('featuredImage', data.featuredImage);
+                    setIsFeatured(data.isFeatured);
                     setValue('category', data.category);
                     setValue('brand', data.brand);
                     setValue('countInStock', data.countInStock);
                     setValue('description', data.description);
+                    console.log(data);
                     
                 } catch (error) {
                     dispatch({ type: 'FETCH_ERROR', payload: getError(error) });
@@ -87,9 +92,12 @@ function ProductEditScreen({ params }) {
         }
     }, []);
 
-    const uploadHandler = async (e) => {
+    const uploadHandler = async (e, imageField = 'image') => {
         const file = e.target.files[0];
-        setValue('image', file);
+        setValue(imageField, file);
+        if(imageField === 'featuredImage') {
+            return setFeaturedImage(file.name);
+        }
         setImageName(file.name);
         // try {
         // dispatch({ type: 'UPLOAD_REQUEST' });
@@ -124,7 +132,8 @@ function ProductEditScreen({ params }) {
             });
             setValue('link', data.secure_url);
             setPublicId(data.public_id);
-            await axios.put(`/api/admin/products/${productId}`, {
+            await axios.put(`/api/admin/products/${productId}`, 
+            {
                 name: e.name,
                 slug: e.slug,
                 price: e.price,
@@ -132,6 +141,8 @@ function ProductEditScreen({ params }) {
                 brand: e.brand,
                 publicId: data.public_id,
                 image: data.secure_url,
+                isFeatured,
+                featuredImage: e.featuredImage,
                 countInStock: e.countInStock,
                 description: e.description
             }, {
@@ -157,8 +168,9 @@ function ProductEditScreen({ params }) {
                 brand: e.brand,
                 publicId,
                 image: e.link,
+                isFeatured,
                 countInStock: e.countInStock,
-                description: e.description
+                description: e.description,
             }, {
                 headers: {
                     authorization: `Bearer ${userInfo.token}`,
@@ -302,11 +314,54 @@ function ProductEditScreen({ params }) {
                                     </ListItem>
                                     <ListItem>
                                         <Button variant="contained" component="label">
-                                            {loadingUpload ? <CircularProgress /> : 'Upload File'}
-                                            <input name='image' type="file" onChange={uploadHandler} hidden />
+                                            {loadingUpload ? <CircularProgress /> : 'Upload File Image'}
+                                            <input type="file" onChange={uploadHandler} hidden />
                                         </Button>
                                         <Typography style={{ marginLeft: "10px" }} color="primary">
                                                 {imageName && imageName}
+                                        </Typography>
+                                    </ListItem>
+                                    <ListItem>
+                                        <FormControlLabel
+                                            label="Is Featured"
+                                            control={
+                                                <Checkbox 
+                                                onClick={(e) => setIsFeatured(e.target.checked)} 
+                                                checked={isFeatured}   
+                                                name="isFeatured"
+                                                />
+                                            }
+                                        >
+                                        </FormControlLabel>
+                                    </ListItem>
+                                    <ListItem>
+                                        <Controller
+                                            name="featuredImage"
+                                            control={control}
+                                            defaultValue=""
+                                            rules={{ 
+                                                required: true,
+                                            }}
+                                            render={({ field }) => (
+                                                <TextField 
+                                                disabled
+                                                variant='outlined' fullWidth id="featuredImage" label="Feature Image"
+                                                error={Boolean(errors.featuredImage)}
+                                                helperText={errors.featuredImage ? 'Featured Image is required' : '' }
+                                                {...field}
+                                                >
+                                                </TextField>
+                                            )}
+                                        >
+                                        </Controller>   
+                                    </ListItem>
+                                    <ListItem>
+                                        <Button variant="contained" component="label">
+                                            {loadingUpload ? <CircularProgress /> : 'Upload Feature Image'}
+                                            <input type="file" onChange={(e) => uploadHandler(e, 'featuredImage')} hidden />
+                                        </Button>
+                                        <Typography style={{ marginLeft: "10px" }} color="primary">
+                                                {featuredImage && featuredImage}
                                         </Typography>
                                     </ListItem>
                                     <ListItem>

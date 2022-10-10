@@ -23,6 +23,8 @@ const data = {
             image: {
                 url: '/images/shirt1.jpg'
             },
+            isFeatured: true,
+            featuredImage: '/images/banner1.jpg',
             price: 70,
             brand: 'Nike',
             rating: 4.5,
@@ -36,9 +38,11 @@ const data = {
             image: {
                 url: '/images/shirt2.jpg',
             },
+            isFeatured: true,
+            featuredImage: '/images/banner2.jpg',
             price: 80,
             brand: 'Adidas',
-            rating: 4.2,
+            rating: 4,
             countInStock: 20,
             description: 'A popular shirt',
         },

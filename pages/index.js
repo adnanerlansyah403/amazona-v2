@@ -1,4 +1,5 @@
-import { Grid } from '@material-ui/core';
+/* eslint-disable @next/next/no-img-element */
+import { Grid, Typography } from '@material-ui/core';
 import Layout from './../components/Layout';
 import db from './../utils/db';
 import Product from './../models/ProductModel';
@@ -7,9 +8,14 @@ import { useRouter } from "next/router";
 import { useContext } from "react";
 import { Store } from "../utils/Store";
 import ProductItem from './../components/ProductItem';
+import useStyles from '../utils/styles';
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import Carousel from 'react-material-ui-carousel';
 
-export default function Home({ products }) {
+function Home({ featuredProducts, topRatedProducts }) {
 
+  const classes = useStyles();
   const router = useRouter();
   const { state, dispatch } = useContext(Store);
 
@@ -28,9 +34,16 @@ export default function Home({ products }) {
 
   return (
     <Layout>
-        <h1>Products</h1>
+        <Carousel className={classes.mt1} animation="slide">
+          {featuredProducts?.map((product) => (
+            <Link key={product._id} href={`/product/${product.slug}`}>
+              <a><img src={product?.featuredImage} alt={product?.name} className={classes.featuredImage} /></a>
+            </Link>
+          ))}
+        </Carousel>
+        <Typography variant="h2">Popular Products</Typography>
         <Grid container spacing={3}>
-          {products?.map((product) => (
+          {topRatedProducts?.map((product) => (
             <Grid item md={4} key={product.name}>
               <ProductItem product={product} addToCartHandler={addToCartHandler}></ProductItem>
             </Grid>
@@ -44,13 +57,19 @@ export async function getServerSideProps () {
 
   await db.connect();
 
-  const products = await Product.find({}, '-reviews').lean();
+  const featuredProductsDocs = await Product.find({ isFeatured: true }, '-reviews').lean().limit(3);
+  const topRatedProductsDocs = await Product.find({}, '-reviews').lean().sort({
+    rating: -1
+  }).limit(6);
 
   await db.disconnect();
   
   return {
     props: {
-      products: products.map(db.convertDocToObject),
+      featuredProducts: featuredProductsDocs.map(db.convertDocToObject),
+      topRatedProducts: topRatedProductsDocs.map(db.convertDocToObject),
     }
   }
 }
+
+export default dynamic(() => Promise.resolve(Home), {ssr: false});

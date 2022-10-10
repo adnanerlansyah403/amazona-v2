@@ -30,6 +30,8 @@ handler.put(async (req, res) => {
 
   const product = await Product.findById(req.query.id);
 
+  console.log(req.body);
+
   if(product) {
     console.log(req.body);
     product.name = req.body.name;
@@ -39,15 +41,17 @@ handler.put(async (req, res) => {
     product.brand = req.body.brand;
     product.image.public_id = req.body.publicId;
     product.image.url = req.body.image;
+    product.isFeatured = req.body.isFeatured;
+    product.featuredImage = req.body.featuredImage;
     product.countInStock = req.body.countInStock;
     product.description = req.body.description;
 
     await product.save();
     await db.disconnect();
     
-    // return res.send({
-    //   message: 'Product updated successfully',
-    // });
+    return res.send({
+      message: 'Product updated successfully',
+    });
   }
 
   await db.disconnect();
