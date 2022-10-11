@@ -37,7 +37,7 @@ function Home({ featuredProducts, topRatedProducts }) {
         <Carousel className={classes.mt1} animation="slide">
           {featuredProducts?.map((product) => (
             <Link key={product._id} href={`/product/${product.slug}`}>
-              <a><img src={product?.featuredImage} alt={product?.name} className={classes.featuredImage} /></a>
+              <a><img src={product?.featuredImage?.url} alt={product?.name} className={classes.featuredImage} /></a>
             </Link>
           ))}
         </Carousel>

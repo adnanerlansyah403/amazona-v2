@@ -53,25 +53,26 @@ function UserEditScreen({ params }) {
     const router = useRouter();
     const classes = useStyles();
     
+    const fetchData = async () => {
+        try {
+            dispatch({ type: 'FETCH_REQUEST' });
+            const { data } = await axios.get(`/api/admin/users/${userId}`, {
+                headers: {
+                    authorization: 'Bearer ' + userInfo.token,
+                }
+            });
+            setIsAdmin(data.isAdmin);
+            dispatch({ type: 'FETCH_SUCCESS' });
+            setValue('name', data.name);
+        } catch (error) {
+            dispatch({ type: 'FETCH_ERROR', payload: getError(error) });
+        }
+    }
+    
     useEffect(() => {
         if(!userInfo) {
             return router.push('/login');
         } else {
-            const fetchData = async () => {
-                try {
-                    dispatch({ type: 'FETCH_REQUEST' });
-                    const { data } = await axios.get(`/api/admin/users/${userId}`, {
-                        headers: {
-                            authorization: 'Bearer ' + userInfo.token,
-                        }
-                    });
-                    setIsAdmin(data.isAdmin);
-                    dispatch({ type: 'FETCH_SUCCESS' });
-                    setValue('name', data.name);
-                } catch (error) {
-                    dispatch({ type: 'FETCH_ERROR', payload: getError(error) });
-                }
-            }
             fetchData();
         }
     }, []);

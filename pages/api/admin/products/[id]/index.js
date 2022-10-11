@@ -42,7 +42,8 @@ handler.put(async (req, res) => {
     product.image.public_id = req.body.publicId;
     product.image.url = req.body.image;
     product.isFeatured = req.body.isFeatured;
-    product.featuredImage = req.body.featuredImage;
+    product.featuredImage.public_id = req.body.publicIdFeaturedImage;
+    product.featuredImage.url = req.body.featuredImage;
     product.countInStock = req.body.countInStock;
     product.description = req.body.description;
 

@@ -51,14 +51,16 @@ function ProductEditScreen({ params }) {
     const { userInfo } = state;
     const router = useRouter();
     const classes = useStyles();
-    const [ publicId, setPublicId ] = useState("");
+    const [ publicIdImage, setPublicIdImage ] = useState("");
     const [imageName, setImageName] = useState("");
-    const [featuredImage, setFeaturedImage] = useState("");
+    const [ publicIdFeaturedImage, setPublicIdFeaturedImage ] = useState("");
+    const [featuredImageName, setFeaturedImageName] = useState("");
     const [isFeatured, setIsFeatured] = useState(false);
     
     useEffect(() => {
         if(!userInfo) {
-            return router.push('/login');
+            router.push('/login');
+            return;
         } else {
 
             const fetchData = async () => {
@@ -74,14 +76,14 @@ function ProductEditScreen({ params }) {
                     setValue('slug', data.slug);
                     setValue('price', data.price);
                     setValue('link', data.image.url);
-                    setPublicId(data.image.public_id);
-                    setValue('featuredImage', data.featuredImage);
+                    setPublicIdImage(data.image.public_id);
+                    setValue('linkFeaturedImage', data.featuredImage.url);
+                    setPublicIdFeaturedImage(data.featuredImage.public_id);
                     setIsFeatured(data.isFeatured);
                     setValue('category', data.category);
                     setValue('brand', data.brand);
                     setValue('countInStock', data.countInStock);
                     setValue('description', data.description);
-                    console.log(data);
                     
                 } catch (error) {
                     dispatch({ type: 'FETCH_ERROR', payload: getError(error) });
@@ -96,67 +98,106 @@ function ProductEditScreen({ params }) {
         const file = e.target.files[0];
         setValue(imageField, file);
         if(imageField === 'featuredImage') {
-            return setFeaturedImage(file.name);
+            setFeaturedImageName(file.name);
+        } else {
+            setImageName(file.name);
         }
-        setImageName(file.name);
-        // try {
-        // dispatch({ type: 'UPLOAD_REQUEST' });
-        // const { data } = await axios.post('/api/admin/upload', bodyFormData, {
-        //     headers: {
-        //     'Content-Type': 'multipart/form-data',
-        //     authorization: `Bearer ${userInfo.token}`,
-        //     },
-        // });
-        // dispatch({ type: 'UPLOAD_SUCCESS' });
-        // setValue(imageField, data.secure_url);
-        // setPublicId(data.public_id)
-        // enqueueSnackbar('File uploaded successfully', { variant: 'success' });
-        // } catch (err) {
-        // dispatch({ type: 'UPLOAD_FAIL', payload: getError(err) });
-        // enqueueSnackbar(getError(err), { variant: 'error' });
-        // }
     };
 
     const submitHandler = async (e) => {
         closeSnackbar();
-        if(e.image !== undefined) {
-            const bodyFormData = new FormData();
-            bodyFormData.append('file', e.image);
-            try {
-            dispatch({ type: 'UPDATE_REQUEST' });
-            const { data } = await axios.post('/api/admin/upload', bodyFormData, {
-                headers: {
-                'Content-Type': 'multipart/form-data',
-                authorization: `Bearer ${userInfo.token}`,
-                },
-            });
-            setValue('link', data.secure_url);
-            setPublicId(data.public_id);
-            await axios.put(`/api/admin/products/${productId}`, 
-            {
-                name: e.name,
-                slug: e.slug,
-                price: e.price,
-                category: e.category,
-                brand: e.brand,
-                publicId: data.public_id,
-                image: data.secure_url,
-                isFeatured,
-                featuredImage: e.featuredImage,
-                countInStock: e.countInStock,
-                description: e.description
-            }, {
-                headers: {
-                    authorization: `Bearer ${userInfo.token}`,
-                },
-            });
-            dispatch({ type: 'UPDATE_SUCCESS' });
-            enqueueSnackbar('Updated and uploaded image successfully', { variant: "success" });
-            } catch (error) {
-                dispatch({ type: 'UPDATE_FAIL', payload: getError(error) });
-                enqueueSnackbar(getError(error), { variant: 'error' });
+        if(e.image !== undefined || e.featuredImage !== undefined) {
+            // upload featuredImage
+            if(e.featuredImage !== undefined) {
+                try {
+                    dispatch({ type: 'UPDATE_REQUEST' });
+                    const bodyFormDataImage = new FormData();
+                    bodyFormDataImage.append('file', e.image);
+                    const { data: dataImage } = await axios.post('/api/admin/upload', bodyFormDataImage, {
+                        headers: {
+                        'Content-Type': 'multipart/form-data',
+                        authorization: `Bearer ${userInfo.token}`,
+                        },
+                    });
+                    setValue('link', dataImage.secure_url);
+                    setPublicIdImage(dataImage.public_id);
+                    // upload featuredImage
+                    const bodyFormDataFeaturedImage = new FormData();
+                    bodyFormDataFeaturedImage.append('file', e.featuredImage);
+                    console.log(bodyFormDataFeaturedImage)
+                    const { data: dataFeaturedImage } = await axios.post('/api/admin/upload', bodyFormDataFeaturedImage, {
+                        headers: {
+                        'Content-Type': 'multipart/form-data',
+                        authorization: `Bearer ${userInfo.token}`,
+                        },
+                    });
+                    setValue('linkFeaturedImage', dataFeaturedImage.secure_url);
+                    setPublicIdImage(dataFeaturedImage.public_id);
+                    await axios.put(`/api/admin/products/${productId}`, 
+                    {
+                        name: e.name,
+                        slug: e.slug,
+                        price: e.price,
+                        category: e.category,
+                        brand: e.brand,
+                        publicIdImage: dataImage.public_id,
+                        image: dataImage.secure_url,
+                        isFeatured,
+                        publicIdFeaturedImage: dataFeaturedImage.public_id,
+                        featuredImage: dataFeaturedImage.secure_url,
+                        countInStock: e.countInStock,
+                        description: e.description
+                    }, {
+                        headers: {
+                            authorization: `Bearer ${userInfo.token}`,
+                        },
+                    });
+                    dispatch({ type: 'UPDATE_SUCCESS' });
+                    enqueueSnackbar('Updated and uploaded image successfully', { variant: "success" });
+                    } catch (error) {
+                        dispatch({ type: 'UPDATE_FAIL', payload: getError(error) });
+                        enqueueSnackbar(getError(error), { variant: 'error' });
+                    }
+                    return router.push('/admin/products');
+            } else {
+                try {
+                    dispatch({ type: 'UPDATE_REQUEST' });
+                    const bodyFormDataImage = new FormData();
+                    bodyFormDataImage.append('file', e.image);
+                    const { data: dataImage } = await axios.post('/api/admin/upload', bodyFormDataImage, {
+                        headers: {
+                        'Content-Type': 'multipart/form-data',
+                        authorization: `Bearer ${userInfo.token}`,
+                        },
+                    });
+                    setValue('link', dataImage.secure_url);
+                    setPublicIdImage(dataImage.public_id);
+                    await axios.put(`/api/admin/products/${productId}`, 
+                    {
+                        name: e.name,
+                        slug: e.slug,
+                        price: e.price,
+                        category: e.category,
+                        brand: e.brand,
+                        publicIdImage: dataImage.public_id,
+                        image: dataImage.secure_url,
+                        isFeatured,
+                        featuredImage: e.featuredImage,
+                        countInStock: e.countInStock,
+                        description: e.description
+                    }, {
+                        headers: {
+                            authorization: `Bearer ${userInfo.token}`,
+                        },
+                    });
+                    dispatch({ type: 'UPDATE_SUCCESS' });
+                    enqueueSnackbar('Updated and uploaded image successfully', { variant: "success" });
+                } catch (error) {
+                    dispatch({ type: 'UPDATE_FAIL', payload: getError(error) });
+                    enqueueSnackbar(getError(error), { variant: 'error' });
+                }
+                return router.push('/admin/products');
             }
-            return router.push('/admin/products');
         }
         try {
             dispatch({ type: 'UPDATE_REQUEST' });
@@ -166,9 +207,11 @@ function ProductEditScreen({ params }) {
                 price: e.price,
                 category: e.category,
                 brand: e.brand,
-                publicId,
+                publicIdImage,
                 image: e.link,
                 isFeatured,
+                publicIdFeaturedImage,
+                featuredImage: e.linkFeaturedImage,
                 countInStock: e.countInStock,
                 description: e.description,
             }, {
@@ -209,7 +252,7 @@ function ProductEditScreen({ params }) {
                         </Link>
                         <Link href="/admin/users" passHref>
                             <ListItem button>
-                                <ListItemText primary="users"></ListItemText>
+                                <ListItemText primary="Users"></ListItemText>
                             </ListItem>
                         </Link>
                     </List>
@@ -336,7 +379,7 @@ function ProductEditScreen({ params }) {
                                     </ListItem>
                                     <ListItem>
                                         <Controller
-                                            name="featuredImage"
+                                            name="linkFeaturedImage"
                                             control={control}
                                             defaultValue=""
                                             rules={{ 
@@ -345,7 +388,7 @@ function ProductEditScreen({ params }) {
                                             render={({ field }) => (
                                                 <TextField 
                                                 disabled
-                                                variant='outlined' fullWidth id="featuredImage" label="Feature Image"
+                                                variant='outlined' fullWidth id="linkFeaturedImage" label="Link Feature Image"
                                                 error={Boolean(errors.featuredImage)}
                                                 helperText={errors.featuredImage ? 'Featured Image is required' : '' }
                                                 {...field}
@@ -361,7 +404,7 @@ function ProductEditScreen({ params }) {
                                             <input type="file" onChange={(e) => uploadHandler(e, 'featuredImage')} hidden />
                                         </Button>
                                         <Typography style={{ marginLeft: "10px" }} color="primary">
-                                                {featuredImage && featuredImage}
+                                                {featuredImageName && featuredImageName}
                                         </Typography>
                                     </ListItem>
                                     <ListItem>
