@@ -33,13 +33,30 @@ handler.put(async (req, res) => {
   console.log(req.body);
 
   if(product) {
-    console.log(req.body);
+
+    
+    if(req.body.publicIdImage !== '' && product.image.public_id.length === 0) {
+      console.log('hapus gambar');
+
+      if(product.image.public_id.length > 0) {
+        cloudinary.uploader.destroy(product.image.public_id)
+      }
+    } else if(req.body.publicIdFeaturedImage !== '' && product.featuredImage.public_id.length === 0) {
+      if(product.featuredImage.public_id.length > 0) {
+        cloudinary.uploader.destroy(product.featuredImage.public_id)
+      }
+    } else {
+      cloudinary.uploader.destroy(product.image.public_id);
+      cloudinary.uploader.destroy(product.featuredImage.public_id);
+    }
+
+
     product.name = req.body.name;
     product.slug = req.body.slug;
     product.price = req.body.price;
     product.category = req.body.category;
     product.brand = req.body.brand;
-    product.image.public_id = req.body.publicId;
+    product.image.public_id = req.body.publicIdImage;
     product.image.url = req.body.image;
     product.isFeatured = req.body.isFeatured;
     product.featuredImage.public_id = req.body.publicIdFeaturedImage;

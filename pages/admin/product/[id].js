@@ -84,6 +84,7 @@ function ProductEditScreen({ params }) {
                     setValue('brand', data.brand);
                     setValue('countInStock', data.countInStock);
                     setValue('description', data.description);
+                    console.log(data)
                     
                 } catch (error) {
                     dispatch({ type: 'FETCH_ERROR', payload: getError(error) });
@@ -98,9 +99,9 @@ function ProductEditScreen({ params }) {
         const file = e.target.files[0];
         setValue(imageField, file);
         if(imageField === 'featuredImage') {
-            setFeaturedImageName(file.name);
+            setFeaturedImageName(file?.name);
         } else {
-            setImageName(file.name);
+            setImageName(file?.name);
         }
     };
 
@@ -121,7 +122,7 @@ function ProductEditScreen({ params }) {
                         },
                     });
                     setValue('linkFeaturedImage', dataFeaturedImage.secure_url);
-                    setPublicIdImage(dataFeaturedImage.public_id);
+                    console.log(dataFeaturedImage.public_id);
                     await axios.put(`/api/admin/products/${productId}`, 
                     {
                         name: e.name,
@@ -149,12 +150,11 @@ function ProductEditScreen({ params }) {
                     bodyFormDataImage.append('file', e.image);
                     const { data: dataImage } = await axios.post('/api/admin/upload', bodyFormDataImage, {
                         headers: {
-                        'Content-Type': 'multipart/form-data',
-                        authorization: `Bearer ${userInfo.token}`,
+                            'Content-Type': 'multipart/form-data',
+                            authorization: `Bearer ${userInfo.token}`,
                         },
                     });
                     setValue('link', dataImage.secure_url);
-                    setPublicIdImage(dataImage.public_id);
                     await axios.put(`/api/admin/products/${productId}`, 
                     {
                         name: e.name,
@@ -184,8 +184,8 @@ function ProductEditScreen({ params }) {
                 bodyFormDataImage.append('file', e.image);
                 const { data: dataImage } = await axios.post('/api/admin/upload', bodyFormDataImage, {
                     headers: {
-                    'Content-Type': 'multipart/form-data',
-                    authorization: `Bearer ${userInfo.token}`,
+                        'Content-Type': 'multipart/form-data',
+                        authorization: `Bearer ${userInfo.token}`,
                     },
                 });
                 setValue('link', dataImage.secure_url);
@@ -196,12 +196,12 @@ function ProductEditScreen({ params }) {
                 console.log(bodyFormDataFeaturedImage)
                 const { data: dataFeaturedImage } = await axios.post('/api/admin/upload', bodyFormDataFeaturedImage, {
                     headers: {
-                    'Content-Type': 'multipart/form-data',
-                    authorization: `Bearer ${userInfo.token}`,
+                        'Content-Type': 'multipart/form-data',
+                        authorization: `Bearer ${userInfo.token}`,
                     },
                 });
                 setValue('linkFeaturedImage', dataFeaturedImage.secure_url);
-                setPublicIdImage(dataFeaturedImage.public_id);
+                setPublicIdFeaturedImage(dataFeaturedImage.public_id);
                 await axios.put(`/api/admin/products/${productId}`, 
                 {
                     name: e.name,
@@ -209,10 +209,10 @@ function ProductEditScreen({ params }) {
                     price: e.price,
                     category: e.category,
                     brand: e.brand,
-                    publicIdImage: dataImage.public_id,
+                    publicIdImage,
                     image: dataImage.secure_url,
                     isFeatured,
-                    publicIdFeaturedImage: dataFeaturedImage.public_id,
+                    publicIdFeaturedImage,
                     featuredImage: dataFeaturedImage.secure_url,
                     countInStock: e.countInStock,
                     description: e.description
@@ -222,7 +222,7 @@ function ProductEditScreen({ params }) {
                     },
                 });
                 dispatch({ type: 'UPDATE_SUCCESS' });
-                enqueueSnackbar('Updated and uploaded image successfully', { variant: "success" });
+                enqueueSnackbar('Updated and uploaded image&feature successfully', { variant: "success" });
                 return router.push('/admin/products');
             }
             
