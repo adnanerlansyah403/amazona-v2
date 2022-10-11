@@ -106,22 +106,11 @@ function ProductEditScreen({ params }) {
 
     const submitHandler = async (e) => {
         closeSnackbar();
-        if(e.image !== undefined || e.featuredImage !== undefined) {
-            // upload featuredImage
-            if(e.featuredImage !== undefined) {
-                try {
-                    dispatch({ type: 'UPDATE_REQUEST' });
-                    const bodyFormDataImage = new FormData();
-                    bodyFormDataImage.append('file', e.image);
-                    const { data: dataImage } = await axios.post('/api/admin/upload', bodyFormDataImage, {
-                        headers: {
-                        'Content-Type': 'multipart/form-data',
-                        authorization: `Bearer ${userInfo.token}`,
-                        },
-                    });
-                    setValue('link', dataImage.secure_url);
-                    setPublicIdImage(dataImage.public_id);
-                    // upload featuredImage
+        try {
+            dispatch({ type: 'UPDATE_REQUEST' });
+            if(e.image !== undefined || e.featuredImage !== undefined) {
+                
+                if(e.featuredImage !== undefined && e.image === undefined) {
                     const bodyFormDataFeaturedImage = new FormData();
                     bodyFormDataFeaturedImage.append('file', e.featuredImage);
                     console.log(bodyFormDataFeaturedImage)
@@ -140,8 +129,8 @@ function ProductEditScreen({ params }) {
                         price: e.price,
                         category: e.category,
                         brand: e.brand,
-                        publicIdImage: dataImage.public_id,
-                        image: dataImage.secure_url,
+                        publicIdImage,
+                        image: e.link,
                         isFeatured,
                         publicIdFeaturedImage: dataFeaturedImage.public_id,
                         featuredImage: dataFeaturedImage.secure_url,
@@ -153,15 +142,9 @@ function ProductEditScreen({ params }) {
                         },
                     });
                     dispatch({ type: 'UPDATE_SUCCESS' });
-                    enqueueSnackbar('Updated and uploaded image successfully', { variant: "success" });
-                    } catch (error) {
-                        dispatch({ type: 'UPDATE_FAIL', payload: getError(error) });
-                        enqueueSnackbar(getError(error), { variant: 'error' });
-                    }
+                    enqueueSnackbar('Updated and uploaded feature image successfully', { variant: "success" });
                     return router.push('/admin/products');
-            } else {
-                try {
-                    dispatch({ type: 'UPDATE_REQUEST' });
+                } else if(e.featuredImage === undefined && e.image !== undefined) {
                     const bodyFormDataImage = new FormData();
                     bodyFormDataImage.append('file', e.image);
                     const { data: dataImage } = await axios.post('/api/admin/upload', bodyFormDataImage, {
@@ -182,7 +165,8 @@ function ProductEditScreen({ params }) {
                         publicIdImage: dataImage.public_id,
                         image: dataImage.secure_url,
                         isFeatured,
-                        featuredImage: e.featuredImage,
+                        publicIdFeaturedImage,
+                        featuredImage: e.linkFeaturedImage,
                         countInStock: e.countInStock,
                         description: e.description
                     }, {
@@ -192,15 +176,57 @@ function ProductEditScreen({ params }) {
                     });
                     dispatch({ type: 'UPDATE_SUCCESS' });
                     enqueueSnackbar('Updated and uploaded image successfully', { variant: "success" });
-                } catch (error) {
-                    dispatch({ type: 'UPDATE_FAIL', payload: getError(error) });
-                    enqueueSnackbar(getError(error), { variant: 'error' });
+                    return router.push('/admin/products');
                 }
+                
+                // berjalan ketika memang terdapat perubahan pada file image dan featuredImage
+                const bodyFormDataImage = new FormData();
+                bodyFormDataImage.append('file', e.image);
+                const { data: dataImage } = await axios.post('/api/admin/upload', bodyFormDataImage, {
+                    headers: {
+                    'Content-Type': 'multipart/form-data',
+                    authorization: `Bearer ${userInfo.token}`,
+                    },
+                });
+                setValue('link', dataImage.secure_url);
+                setPublicIdImage(dataImage.public_id);
+                // upload featuredImage
+                const bodyFormDataFeaturedImage = new FormData();
+                bodyFormDataFeaturedImage.append('file', e.featuredImage);
+                console.log(bodyFormDataFeaturedImage)
+                const { data: dataFeaturedImage } = await axios.post('/api/admin/upload', bodyFormDataFeaturedImage, {
+                    headers: {
+                    'Content-Type': 'multipart/form-data',
+                    authorization: `Bearer ${userInfo.token}`,
+                    },
+                });
+                setValue('linkFeaturedImage', dataFeaturedImage.secure_url);
+                setPublicIdImage(dataFeaturedImage.public_id);
+                await axios.put(`/api/admin/products/${productId}`, 
+                {
+                    name: e.name,
+                    slug: e.slug,
+                    price: e.price,
+                    category: e.category,
+                    brand: e.brand,
+                    publicIdImage: dataImage.public_id,
+                    image: dataImage.secure_url,
+                    isFeatured,
+                    publicIdFeaturedImage: dataFeaturedImage.public_id,
+                    featuredImage: dataFeaturedImage.secure_url,
+                    countInStock: e.countInStock,
+                    description: e.description
+                }, {
+                    headers: {
+                        authorization: `Bearer ${userInfo.token}`,
+                    },
+                });
+                dispatch({ type: 'UPDATE_SUCCESS' });
+                enqueueSnackbar('Updated and uploaded image successfully', { variant: "success" });
                 return router.push('/admin/products');
             }
-        }
-        try {
-            dispatch({ type: 'UPDATE_REQUEST' });
+            
+            // berjalan ketika memang tidak ada update pada image dan feature image
             await axios.put(`/api/admin/products/${productId}`, {
                 name: e.name,
                 slug: e.slug,
@@ -222,11 +248,13 @@ function ProductEditScreen({ params }) {
 
             dispatch({ type: 'UPDATE_SUCCESS' });
             enqueueSnackbar('Product updated successfully', { variant: "success" });
-            router.push('/admin/products');
         } catch (error) {
-            dispatch({ type: 'UPDATE_REQUEST', payload: getError(error) });
+            dispatch({ type: 'UPDATE_FAIL', payload: getError(error) });
             enqueueSnackbar(getError(error), { variant: 'error' });
         }
+        return router.push('/admin/products');
+        
+        // end of the line
     }
 
   return (
